@@ -1,0 +1,31 @@
+Suggestions for code improvement:
+
+1. Use destructuring to extract Checkmark component from the react-checkmark library, i.e. `import { Checkmark } from 'react-checkmark';` can be changed to `import Checkmark from 'react-checkmark';`.
+2. Use template literals to interpolate the color prop in the Checkmark component, i.e. `color='#6772e5'` can be changed to `color={`#6772e5`}`.
+3. Use a more specific class name for success-message, i.e. `success__message`, to maintain consistency with the class name for the h1 element.
+4. Use prop-types to specify the PropTypes of the Success component for better type checking and improved code integrity.
+
+Here is the updated code:
+
+```
+import React from 'react';
+import PropTypes from 'prop-types';
+import Card from '../components/Card';
+import Checkmark from 'react-checkmark';
+
+const Success = ({ message }) => (
+  <Card>
+    <div className='success'>
+      <Checkmark size='xLarge' color={`#6772e5`}/>
+      <h1 className='success__h1'>Success!</h1>
+      <p className='success__message'>{message}</p>
+    </div>
+  </Card>
+);
+
+Success.propTypes = {
+  message: PropTypes.string.isRequired,
+};
+
+export default Success;
+```
