@@ -6,4 +6,4 @@ To run the extension:
 2. run npm install
 3. open extension.ts
 4. hit F5- this will open a new vscode window with the extension running
-5. open the sidebar
+5. open the sidebar with the robot logo
