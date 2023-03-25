@@ -1,1 +1,1 @@
-# sp23-edtech-upskilling
+#peritus-ai
