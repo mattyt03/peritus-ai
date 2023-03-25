@@ -2,7 +2,7 @@
 
 To run the extension:
 
-1. cd into peritus-ai
+1. cd into peritus-ai (the subfolder)
 2. run npm install
 3. open extension.ts
 4. hit F5- this will open a new vscode window with the extension running
