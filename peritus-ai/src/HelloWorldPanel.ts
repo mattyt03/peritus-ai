@@ -28,7 +28,7 @@ export class HelloWorldPanel {
     // Otherwise, create a new panel.
     const panel = vscode.window.createWebviewPanel(
       HelloWorldPanel.viewType,
-      "VSinder",
+      "Peritus AI",
       column || vscode.ViewColumn.One,
       {
         // Enable javascript in the webview
@@ -125,7 +125,7 @@ export class HelloWorldPanel {
   private _getHtmlForWebview(webview: vscode.Webview) {
     // // And the uri we use to load this script in the webview
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "compiled/main.js")
+      vscode.Uri.joinPath(this._extensionUri, "out/compiled", "HelloWorld.js")
     );
 
     // Local path to css styles
@@ -168,11 +168,12 @@ export class HelloWorldPanel {
         </script>
 			</head>
       <body>
-      <h1>Hello World</h1>
-      <input/>
-      <button>Click me</button>
       </body>
       <script src=${scriptUri} nonce="${nonce}">
       </html>`;
   }
 }
+
+// <h1>Hello World!</h1>
+// <input/>
+// <button>Click me</button>

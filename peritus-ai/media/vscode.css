@@ -1,3 +1,9 @@
+*,
+*::after,
+*::before {
+	box-sizing: border-box;
+}
+
 :root {
 	--container-padding: 20px;
 	--input-padding-vertical: 6px;
@@ -12,7 +18,11 @@ body {
 	font-size: var(--vscode-font-size);
 	font-weight: var(--vscode-font-weight);
 	font-family: var(--vscode-font-family);
-	background-color: var(--vscode-editor-background);
+	/* I guess child elements don't inherit font? */
+	/* font-family: 'Montserrat', sans-serif; */
+	/* background-color: var(--vscode-editor-background); */
+	/* background-color: rgb(37, 37, 38); */
+	background-color: #20172F;
 }
 
 ol,

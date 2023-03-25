@@ -1,88 +1,31 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ([
-/* 0 */,
-/* 1 */
-/***/ ((module) => {
+/******/ 	var __webpack_modules__ = ({
 
-module.exports = require("vscode");
-
-/***/ }),
-/* 2 */
+/***/ "./src/SidebarProvider.ts":
+/*!********************************!*\
+  !*** ./src/SidebarProvider.ts ***!
+  \********************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.HelloWorldPanel = void 0;
-const vscode = __webpack_require__(1);
-const getNonce_1 = __webpack_require__(3);
-class HelloWorldPanel {
-    static createOrShow(extensionUri) {
-        const column = vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.viewColumn
-            : undefined;
-        // If we already have a panel, show it.
-        if (HelloWorldPanel.currentPanel) {
-            HelloWorldPanel.currentPanel._panel.reveal(column);
-            HelloWorldPanel.currentPanel._update();
-            return;
-        }
-        // Otherwise, create a new panel.
-        const panel = vscode.window.createWebviewPanel(HelloWorldPanel.viewType, "VSinder", column || vscode.ViewColumn.One, {
-            // Enable javascript in the webview
+exports.SidebarProvider = void 0;
+const vscode = __webpack_require__(/*! vscode */ "vscode");
+const getNonce_1 = __webpack_require__(/*! ./getNonce */ "./src/getNonce.ts");
+class SidebarProvider {
+    constructor(_extensionUri) {
+        this._extensionUri = _extensionUri;
+    }
+    resolveWebviewView(webviewView) {
+        this._view = webviewView;
+        webviewView.webview.options = {
+            // Allow scripts in the webview
             enableScripts: true,
-            // And restrict the webview to only loading content from our extension's `media` directory.
-            localResourceRoots: [
-                vscode.Uri.joinPath(extensionUri, "media"),
-                vscode.Uri.joinPath(extensionUri, "out/compiled"),
-            ],
-        });
-        HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri);
-    }
-    static kill() {
-        HelloWorldPanel.currentPanel?.dispose();
-        HelloWorldPanel.currentPanel = undefined;
-    }
-    static revive(panel, extensionUri) {
-        HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri);
-    }
-    constructor(panel, extensionUri) {
-        this._disposables = [];
-        this._panel = panel;
-        this._extensionUri = extensionUri;
-        // Set the webview's initial html content
-        this._update();
-        // Listen for when the panel is disposed
-        // This happens when the user closes the panel or when the panel is closed programatically
-        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-        // // Handle messages from the webview
-        // this._panel.webview.onDidReceiveMessage(
-        //   (message) => {
-        //     switch (message.command) {
-        //       case "alert":
-        //         vscode.window.showErrorMessage(message.text);
-        //         return;
-        //     }
-        //   },
-        //   null,
-        //   this._disposables
-        // );
-    }
-    dispose() {
-        HelloWorldPanel.currentPanel = undefined;
-        // Clean up our resources
-        this._panel.dispose();
-        while (this._disposables.length) {
-            const x = this._disposables.pop();
-            if (x) {
-                x.dispose();
-            }
-        }
-    }
-    async _update() {
-        const webview = this._panel.webview;
-        this._panel.webview.html = this._getHtmlForWebview(webview);
-        webview.onDidReceiveMessage(async (data) => {
+            localResourceRoots: [this._extensionUri],
+        };
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+        webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
                 case "onInfo": {
                     if (!data.value) {
@@ -98,27 +41,19 @@ class HelloWorldPanel {
                     vscode.window.showErrorMessage(data.value);
                     break;
                 }
-                // case "tokens": {
-                //   await Util.globalState.update(accessTokenKey, data.accessToken);
-                //   await Util.globalState.update(refreshTokenKey, data.refreshToken);
-                //   break;
-                // }
             }
         });
     }
+    revive(panel) {
+        this._view = panel;
+    }
     _getHtmlForWebview(webview) {
-        // // And the uri we use to load this script in the webview
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "compiled/main.js"));
-        // Local path to css styles
-        const styleResetPath = vscode.Uri.joinPath(this._extensionUri, "media", "reset.css");
-        const stylesPathMainPath = vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css");
-        // Uri to load styles into webview
-        const stylesResetUri = webview.asWebviewUri(styleResetPath);
-        const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
-        // const cssUri = webview.asWebviewUri(
-        //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/swiper.css")
-        // );
-        // // Use a nonce to only allow specific scripts to be run
+        const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
+        const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
+        const stylePrismUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "prism.css"));
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.js"));
+        const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.css"));
+        // Use a nonce to only allow a specific script to be run.
         const nonce = (0, getNonce_1.default)();
         return `<!DOCTYPE html>
 			<html lang="en">
@@ -129,27 +64,31 @@ class HelloWorldPanel {
 					and only allow scripts that have a specific nonce.
         -->
         <meta http-equiv="Content-Security-Policy" content="img-src https: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src 'nonce-${nonce}';">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="${stylesResetUri}" rel="stylesheet">
-        <link href="${stylesMainUri}" rel="stylesheet">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<link href="${styleResetUri}" rel="stylesheet">
+				<link href="${styleVSCodeUri}" rel="stylesheet">
+        <link href="${stylePrismUri}" rel="stylesheet">
+        <link href="${styleMainUri}" rel="stylesheet">
         <script nonce="${nonce}">
+          const tsvscode = acquireVsCodeApi();
         </script>
 			</head>
       <body>
-      <h1>Hello World</h1>
-      <input/>
-      <button>Click me</button>
-      </body>
-      <script src=${scriptUri} nonce="${nonce}">
-      </html>`;
+				<script nonce="${nonce}" src="${scriptUri}"></script>
+			</body>
+			</html>`;
     }
 }
-exports.HelloWorldPanel = HelloWorldPanel;
-HelloWorldPanel.viewType = "hello-world";
+exports.SidebarProvider = SidebarProvider;
+// TODO: Understand content security policy
 
 
 /***/ }),
-/* 3 */
+
+/***/ "./src/getNonce.ts":
+/*!*************************!*\
+  !*** ./src/getNonce.ts ***!
+  \*************************/
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -165,8 +104,19 @@ function getNonce() {
 exports["default"] = getNonce;
 
 
+/***/ }),
+
+/***/ "vscode":
+/*!*************************!*\
+  !*** external "vscode" ***!
+  \*************************/
+/***/ ((module) => {
+
+module.exports = require("vscode");
+
 /***/ })
-/******/ 	]);
+
+/******/ 	});
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
@@ -197,38 +147,80 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 var exports = __webpack_exports__;
+/*!**************************!*\
+  !*** ./src/extension.ts ***!
+  \**************************/
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deactivate = exports.activate = void 0;
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-const vscode = __webpack_require__(1);
-const HelloWorldPanel_1 = __webpack_require__(2);
+const vscode = __webpack_require__(/*! vscode */ "vscode");
+const SidebarProvider_1 = __webpack_require__(/*! ./SidebarProvider */ "./src/SidebarProvider.ts");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    console.log('Congratulations, your extension "peritus-ai" is now active!');
+    const sidebarProvider = new SidebarProvider_1.SidebarProvider(context.extensionUri);
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider("peritus-ai-sidebar", sidebarProvider));
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with registerCommand
     // The commandId parameter must match the command field in package.json
+    // context.subscriptions.push disposes of the listener when we're done
     context.subscriptions.push(vscode.commands.registerCommand('peritus-ai.helloWorld', () => {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello from Peritus AI!');
-        HelloWorldPanel_1.HelloWorldPanel.createOrShow(context.extensionUri);
+        // HelloWorldPanel.createOrShow(context.extensionUri);
     }));
-    context.subscriptions.push(vscode.commands.registerCommand('peritus-ai.askQuestion', async () => {
-        // The code you place here will be executed every time your command is executed
-        // Display a message box to the user
-        const answer = await vscode.window.showInformationMessage("How was your day?", "good", "bad");
-        if (answer === "bad") {
-            vscode.window.showInformationMessage("Sorry to hear that");
-        }
-        else {
-            console.log(answer);
-        }
+    // context.subscriptions.push(
+    // 	vscode.commands.registerCommand('peritus-ai.askQuestion', async () => {
+    // 		const answer = await vscode.window.showInformationMessage("How was your day?", "good", "bad");
+    // 		if (answer === "bad") {
+    // 			vscode.window.showInformationMessage("Sorry to hear that");
+    // 		} else {
+    // 			console.log(answer);
+    // 		}
+    // 	})
+    // );
+    context.subscriptions.push(vscode.commands.registerCommand('peritus-ai.refresh', async () => {
+        // HelloWorldPanel.kill();
+        // HelloWorldPanel.createOrShow(context.extensionUri);
+        await vscode.commands.executeCommand("workbench.action.closeSidebar");
+        await vscode.commands.executeCommand("workbench.view.extension.peritus-ai-sidebar-view");
+        // setTimeout(() => {
+        // 	vscode.commands.executeCommand("workbench.action.webview.openDeveloperTools");
+        // }, 500);
+    }));
+    // context.subscriptions.push(
+    // 	vscode.commands.registerCommand('peritus-ai.addTodo', async () => {
+    // 		const {activeTextEditor} = vscode.window;
+    // 		if (!activeTextEditor) {
+    // 			vscode.window.showInformationMessage("No active text editor");
+    // 			return;
+    // 		}
+    // 		// add check if text is empty
+    // 		const text = activeTextEditor.document.getText(activeTextEditor.selection);
+    // 		// vscode.window.showInformationMessage("Text: " + text);
+    // 		sidebarProvider._view?.webview.postMessage({
+    // 			type: 'new-todo',
+    // 			value: text,
+    // 		});
+    // 	})
+    // );
+    context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(() => {
+        const { activeTextEditor } = vscode.window;
+        if (!activeTextEditor)
+            return;
+        if (activeTextEditor.selection.isEmpty)
+            return;
+        // vscode.window.showInformationMessage("Selection changed");
+        const text = activeTextEditor.document.getText(activeTextEditor.selection);
+        // console.log(text);
+        sidebarProvider._view?.webview.postMessage({
+            type: 'selection-change',
+            value: text,
+        });
     }));
 }
 exports.activate = activate;
