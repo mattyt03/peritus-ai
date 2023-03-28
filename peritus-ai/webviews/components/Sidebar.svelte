@@ -18,7 +18,7 @@
   let next_id = 0;
 
   // const explain_prompt = "Briefly explain the following code:";
-  const system_prompt = "You are an AI coding assistant. I will provide you with code, and I want you to answer any questions I have about the code. I may also ask you to modify or improve the code. If you are asked to modify or improve the code, please rewrite the original code with changes implemented. Do not leave any parts out, even if they are parts that remain unchanged. Use three backticks (```) to indicate the start and end of each code block in your response."
+  const system_prompt = "You are an AI coding assistant. I will provide you with code, and I want you to answer any questions I have about the code. I may also ask you to modify or improve the code. If you are asked to modify or improve the code, please rewrite the original code with changes implemented. Do not leave any parts of the original code out, even if they are parts that remain unchanged. Use three backticks (```) to indicate the start and end of each code block in your response. After the three backticks, specify the language of the code block."
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -134,5 +134,6 @@
     display: flex;
     flex-direction: column;
     padding: 0;
+    height: 100vh;
   }
 </style>

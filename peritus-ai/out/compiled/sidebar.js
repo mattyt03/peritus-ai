@@ -6893,11 +6893,11 @@ var app = (function () {
     			div1 = element("div");
     			div0 = element("div");
     			code_1 = element("code");
-    			attr_dev(code_1, "class", "svelte-918uy3");
+    			attr_dev(code_1, "class", "svelte-ovhiet");
     			add_location(code_1, file$3, 13, 4, 278);
-    			attr_dev(div0, "class", "container svelte-918uy3");
+    			attr_dev(div0, "class", "container svelte-ovhiet");
     			add_location(div0, file$3, 11, 2, 218);
-    			attr_dev(div1, "class", "svelte-918uy3");
+    			attr_dev(div1, "class", "svelte-ovhiet");
     			toggle_class(div1, "border-radius", /*asResponse*/ ctx[1]);
     			add_location(div1, file$3, 10, 0, 175);
     		},
@@ -7224,7 +7224,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			t = text(t_value);
-    			attr_dev(p, "class", "response-text svelte-v3tpgv");
+    			attr_dev(p, "class", "response-text svelte-1dz1lgs");
     			add_location(p, file$1, 22, 14, 605);
     		},
     		m: function mount(target, anchor) {
@@ -7387,11 +7387,11 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(div0, "class", "prompt svelte-v3tpgv");
+    			attr_dev(div0, "class", "prompt svelte-1dz1lgs");
     			add_location(div0, file$1, 16, 2, 408);
-    			attr_dev(div1, "class", "response svelte-v3tpgv");
+    			attr_dev(div1, "class", "response svelte-1dz1lgs");
     			add_location(div1, file$1, 17, 2, 445);
-    			attr_dev(div2, "class", "container svelte-v3tpgv");
+    			attr_dev(div2, "class", "container svelte-1dz1lgs");
     			add_location(div2, file$1, 15, 0, 382);
     		},
     		l: function claim(nodes) {
@@ -7737,8 +7737,8 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(body, "class", "svelte-1bjb8bu");
-    			add_location(body, file, 112, 0, 3853);
+    			attr_dev(body, "class", "svelte-ynov1r");
+    			add_location(body, file, 112, 0, 3941);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -7843,7 +7843,7 @@ var app = (function () {
     	return block;
     }
 
-    const system_prompt = "You are an AI coding assistant. I will provide you with code, and I want you to answer any questions I have about the code. I may also ask you to modify or improve the code. If you are asked to modify or improve the code, please rewrite the original code with changes implemented. Do not leave any parts out, even if they are parts that remain unchanged. Use three backticks (```) to indicate the start and end of each code block in your response.";
+    const system_prompt = "You are an AI coding assistant. I will provide you with code, and I want you to answer any questions I have about the code. I may also ask you to modify or improve the code. If you are asked to modify or improve the code, please rewrite the original code with changes implemented. Do not leave any parts of the original code out, even if they are parts that remain unchanged. Use three backticks (```) to indicate the start and end of each code block in your response. After the three backticks, specify the language of the code block.";
 
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;

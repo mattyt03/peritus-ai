@@ -47,14 +47,14 @@
         font-family: "Montserrat", sans-serif;
     }
     .response {
-        padding: 0.5rem;
+        /* padding: 0.5rem; */
         width: 100%;
     }
     .container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 1rem;
+      padding: 1.5rem;
       line-height: 1.5;
       border-radius: 1rem;
       /* overflow: auto; */

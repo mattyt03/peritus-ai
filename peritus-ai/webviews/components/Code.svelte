@@ -34,6 +34,7 @@
     white-space: pre;
     overflow: auto;
     /* background-color: var(--vscode-input-background); */
-    background-color: hsl(256, 26%, 32%);
+    /* background-color: hsl(256, 26%, 32%); */
+    background-color: #483D67;
   }
 </style>

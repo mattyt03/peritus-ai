@@ -212,8 +212,8 @@ function activate(context) {
         const { activeTextEditor } = vscode.window;
         if (!activeTextEditor)
             return;
-        if (activeTextEditor.selection.isEmpty)
-            return;
+        // if (activeTextEditor.selection.isEmpty)
+        // 	return;
         // vscode.window.showInformationMessage("Selection changed");
         const text = activeTextEditor.document.getText(activeTextEditor.selection);
         // console.log(text);
