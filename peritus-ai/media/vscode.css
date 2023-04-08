@@ -37,7 +37,7 @@ form > * {
 }
 
 *:focus {
-	outline-color: var(--vscode-focusBorder) !important;
+	/* outline-color: var(--vscode-focusBorder) !important; */
 }
 
 a {
@@ -71,7 +71,7 @@ button:hover {
 }
 
 button:focus {
-	outline-color: var(--vscode-focusBorder);
+	/* outline-color: var(--vscode-focusBorder); */
 }
 
 button.secondary {

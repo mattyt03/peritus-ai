@@ -7,7 +7,7 @@
     
 </script>
 
-<form on:submit|preventDefault={handleSubmit}>
+<form class="form" on:submit|preventDefault={handleSubmit}>
     <div class="container">
     <input class="prompt" type="text" bind:value={prompt} placeholder="How may I assist you?"/>
     <Code code={selected_code} asResponse={false}/>
@@ -43,5 +43,9 @@
       /* background-color: var(--vscode-input-background); */
       /* border-color: var(--vscode-input-background); */
       border: 1px;
+      margin-bottom: 0;
+    }
+    .form {
+      margin-bottom: 1rem;
     }
   </style>

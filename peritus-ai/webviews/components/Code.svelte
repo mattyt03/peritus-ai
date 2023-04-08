@@ -3,8 +3,21 @@
 
   export let code = "";
   export let asResponse = true;
-  // gpt will specify the language
+  // TODO: change language
   let language = "javascript";
+  // c causes some problems
+  let languages = ["python", "javascript", "java", "html", "css", "c++", 'bash', 'jsx', 'golang', 'go']
+
+  $ : {
+    for (let lang of languages) {
+      if (code.startsWith(lang) || code.startsWith(lang.toUpperCase())) {
+        code = code.slice(lang.length);
+        break;
+      }
+    }
+    code = code.trim();
+    // console.log(code);
+  }
 
 </script>
 

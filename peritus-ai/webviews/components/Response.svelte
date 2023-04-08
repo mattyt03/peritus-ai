@@ -1,26 +1,41 @@
 <script>
     import Code from "./Code.svelte";
+    import Text from "./Text.svelte";
+    import Fa from 'svelte-fa';
+    import { faXmark } from '@fortawesome/pro-regular-svg-icons'
 
     export let prompt;
     export let result;
-    // console.log(result)
+    export let id;
+    export let onRemove;
+
+    // TODO: does this need to be inside the $?
     let beginsWithCode = result.startsWith("```");
-    console.log(beginsWithCode)
+    // console.log(beginsWithCode)
     let mod = beginsWithCode ? 0 : 1;
     let segments = result.split("```");
     segments = segments.filter(segment => segment !== "");
-    console.log(segments);
+
+    $ : {
+        segments = result.split("```");
+        segments = segments.filter(segment => segment !== "");
+        // console.log(segments);
+    } 
 
 </script>
   
 <div class="container">
+  <button on:click={() => onRemove(id)} class="close-btn">
+      <Fa icon={faXmark} size='1.25x'/>
+  </button>
   <div class="prompt">{prompt}</div>
   <div class="response">
       {#each segments as segment, i}
           {#if i % 2 === mod}
               <Code code={segment} />
           {:else}
-              <p class="response-text">{segment}</p>
+              <!-- <p class="response-text">{segment}</p> -->
+              <Text text={segment} />
           {/if}
       {/each}
   </div>
@@ -53,6 +68,7 @@
     .container {
       display: flex;
       flex-direction: column;
+      position: relative;
       align-items: center;
       padding: 1.5rem;
       line-height: 1.5;
@@ -62,5 +78,19 @@
       /* background-color: var(--vscode-input-background); */
       /* border-color: var(--vscode-input-background); */
       border: 1px;
+      margin-bottom: 1rem;
+    }
+    .close-btn {
+        position: absolute;
+        top: -0.66rem;
+        left: -0.66rem;
+        height: 2rem;
+        width: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #483D67;
+        border-radius: 100%;
+        padding: 0.5rem;
     }
   </style>
