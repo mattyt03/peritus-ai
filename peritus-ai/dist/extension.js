@@ -16,6 +16,15 @@ const getNonce_1 = __webpack_require__(/*! ./getNonce */ "./src/getNonce.ts");
 class SidebarProvider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;
+        vscode.window.onDidChangeActiveTextEditor((editor) => {
+            if (editor) {
+                this._doc = editor.document;
+            }
+        });
+        // Set the initial value for _doc
+        if (vscode.window.activeTextEditor) {
+            this._doc = vscode.window.activeTextEditor.document;
+        }
     }
     resolveWebviewView(webviewView) {
         this._view = webviewView;
@@ -27,6 +36,12 @@ class SidebarProvider {
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
+                case "get-file-contents": {
+                    this._view?.webview.postMessage({
+                        type: "file-contents",
+                        value: this._doc?.getText(),
+                    });
+                }
                 case "onInfo": {
                     if (!data.value) {
                         return;
@@ -222,6 +237,17 @@ function activate(context) {
             value: text,
         });
     }));
+    // context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
+    // 	vscode.window.showInformationMessage("File changed");
+    // 	if (vscode.window.activeTextEditor && event.document.uri === vscode.window.activeTextEditor.document.uri) {
+    // 		const text = event.document.getText();
+    // 		console.log(text);
+    // 		sidebarProvider._view?.webview.postMessage({
+    // 			type: 'file-change',
+    // 			value: text,
+    // 		});
+    // 	}
+    // }));
 }
 exports.activate = activate;
 // This method is called when your extension is deactivated

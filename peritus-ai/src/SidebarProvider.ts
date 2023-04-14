@@ -5,7 +5,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(private readonly _extensionUri: vscode.Uri) {
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+      if (editor) {
+        this._doc = editor.document;
+      }
+    });
+
+    // Set the initial value for _doc
+    if (vscode.window.activeTextEditor) {
+      this._doc = vscode.window.activeTextEditor.document;
+    }
+  }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     this._view = webviewView;
@@ -21,6 +32,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
+        case "get-file-contents": {
+          this._view?.webview.postMessage({
+            type: "file-contents",
+            value: this._doc?.getText(),
+          });
+        }
         case "onInfo": {
           if (!data.value) {
             return;

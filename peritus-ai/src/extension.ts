@@ -87,6 +87,18 @@ export function activate(context: vscode.ExtensionContext) {
 			value: text,
 		});
 	}));
+
+	// context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
+	// 	vscode.window.showInformationMessage("File changed");
+	// 	if (vscode.window.activeTextEditor && event.document.uri === vscode.window.activeTextEditor.document.uri) {
+	// 		const text = event.document.getText();
+	// 		console.log(text);
+	// 		sidebarProvider._view?.webview.postMessage({
+	// 			type: 'file-change',
+	// 			value: text,
+	// 		});
+	// 	}
+	// }));
 }
 
 // This method is called when your extension is deactivated

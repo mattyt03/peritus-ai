@@ -13,11 +13,14 @@
   });
   const openai = new OpenAIApi(configuration);
 
+  // TODO: set initial values
   let selected_code = "";
   let prompt = "";
   let loading = false;
   let result = "";
+  let scope = "Selection Context";
   // you don't really need two separate data structures for this
+  // let responses = [{ id: -1, prompt: "Sample prompt", result: "Here is some code: ```some code```"}];
   let responses = [];
   let messages = [{ id: -1, role: "system", content: system_prompt }];
   let next_id = 0;
@@ -31,7 +34,11 @@
       const message = event.data;
       switch (message.type) {
         case "selection-change":
-          selected_code = message.value;
+          // it's kinda inefficient to listen to this message even if the context isn't selection
+          // maybe we should declare the scope in the extension and pass it to the webview?
+          if (scope === "Selection Context") {
+            selected_code = message.value;
+          }
           break;
       }
     });
@@ -70,6 +77,21 @@
     responses = [{ id: next_id, prompt, result}, ...responses];
   };
 
+  const requestFileContents = () => {
+    return new Promise((resolve) => {
+      const handler = (event) => {
+        const message = event.data;
+        if (message.type === "file-contents") {
+          window.removeEventListener("message", handler);
+          resolve(message.value);
+        }
+      };
+
+      window.addEventListener("message", handler);
+      tsvscode.postMessage({ type: "get-file-contents" });
+    });
+  };
+
   const updateStream = delta => {
     if (delta != undefined) {
       result += delta;
@@ -79,18 +101,26 @@
         }
         return response;
       });
-      responses = [...responses];
+      // responses = [...responses];
     }
   }
 
   const streamResponse = async () => {
     // console.log("streaming response");
+    let context = "";
+    if (scope === "File Context") {
+      context = await requestFileContents();
+      // console.log(context)
+    } else if (scope === "Selection Context") {
+      context = selected_code;
+    }
+
     if (prompt !== "") {
       // loading=true;
       result="";
       responses = [{ id: next_id, prompt, result}, ...responses];
       messages = [...messages,
-        { id: next_id, role: "user", content: `${prompt}\n\n${selected_code}` }];
+        { id: next_id, role: "user", content: `${prompt}\n\n${context}` }];
       // console.log(messages);
       let url = "https://api.openai.com/v1/chat/completions";
       let data = {
@@ -122,6 +152,7 @@
           messages = [...messages,
           { id: next_id, role: "assistant", content: result }];
           next_id++;
+          console.log(messages);
         }
       });
       source.stream();
@@ -138,7 +169,11 @@
 
 <body>
   <!-- TODO: fix input and prompt overflow -->
-  <Input selected_code={selected_code} handleSubmit={streamResponse} bind:prompt/>
+  <Input handleSubmit={streamResponse}
+         bind:prompt
+         bind:scope
+         bind:selected_code
+  />
   {#if loading}
     <Response prompt={prompt} result='Loading...'/>
   {/if}

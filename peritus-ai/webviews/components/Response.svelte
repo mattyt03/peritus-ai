@@ -20,22 +20,29 @@
         segments = result.split("```");
         segments = segments.filter(segment => segment !== "");
         // console.log(segments);
-    } 
+    }
+
+    // let showClose = false;
+    // const toggleShow = () => {
+    //     showClose = !showClose;
+    // }
 
 </script>
   
+<!-- on:mouseenter={toggleShow} on:mouseleave={toggleShow} -->
 <div class="container">
   <button on:click={() => onRemove(id)} class="close-btn">
-      <Fa icon={faXmark} size='1.25x'/>
+    <Fa icon={faXmark} size='1.25x' color="lightgrey"/>
   </button>
+  <!-- {#if showClose}
+  {/if} -->
   <div class="prompt">{prompt}</div>
   <div class="response">
       {#each segments as segment, i}
           {#if i % 2 === mod}
-              <Code code={segment} />
+            <Code code={segment} />
           {:else}
-              <!-- <p class="response-text">{segment}</p> -->
-              <Text text={segment} />
+            <Text text={segment} />
           {/if}
       {/each}
   </div>
@@ -57,10 +64,6 @@
         margin-bottom: 1rem;
         font-family: "Montserrat", sans-serif;
     }
-    .response-text {
-        white-space: pre-wrap;
-        font-family: "Montserrat", sans-serif;
-    }
     .response {
         /* padding: 0.5rem; */
         width: 100%;
@@ -77,7 +80,6 @@
       background-color: #302544;
       /* background-color: var(--vscode-input-background); */
       /* border-color: var(--vscode-input-background); */
-      border: 1px;
       margin-bottom: 1rem;
     }
     .close-btn {
@@ -92,5 +94,6 @@
         background-color: #483D67;
         border-radius: 100%;
         padding: 0.5rem;
+        /* box-shadow: 0 3px 10px rgb(0 0 0 / 0.3); */
     }
   </style>
