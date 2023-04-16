@@ -3,6 +3,7 @@
   import { Configuration, OpenAIApi } from "openai";
   import Input from "./Input.svelte";
   import Response from "./Response.svelte";
+  import Home from "./Home.svelte";
   // import { glob } from 'glob';
 
   const configuration = new Configuration({
@@ -112,6 +113,7 @@
 
 <body>
   <!-- TODO: fix input and prompt overflow -->
+  <Home></Home>
   <Input selected_code={selected_code} handleSubmit={handleSubmit} bind:prompt/>
   {#if loading}
     <Response prompt={prompt} result='Loading...'/>
