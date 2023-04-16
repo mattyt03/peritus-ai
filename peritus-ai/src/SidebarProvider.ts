@@ -6,6 +6,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   _doc?: vscode.TextDocument;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
+    // TODO: move this to extension.ts?g
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
         this._doc = editor.document;
@@ -32,6 +33,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
+        case "replace-in-file": {
+          const editor = vscode.window.activeTextEditor;
+          if (editor && data.value) {
+            const document = editor.document;
+            const selectedText = editor.selection;
+
+            const workspaceEdit = new vscode.WorkspaceEdit();
+            workspaceEdit.replace(document.uri, selectedText, data.value);
+
+            await vscode.workspace.applyEdit(workspaceEdit);
+          }
+          break;
+        }
         case "get-file-contents": {
           this._view?.webview.postMessage({
             type: "file-contents",

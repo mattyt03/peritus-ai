@@ -80,13 +80,19 @@ export function activate(context: vscode.ExtensionContext) {
 		// if (activeTextEditor.selection.isEmpty)
 		// 	return;
 		// vscode.window.showInformationMessage("Selection changed");
-		const text = activeTextEditor.document.getText(activeTextEditor.selection);
-		// console.log(text);
+		const selection = activeTextEditor.selection;
+		const selected_code = activeTextEditor.document.getText(selection);
+		// line numbers are 0-based, add 1 for display
+		const start_line = selection.start.line + 1; 
+		
 		sidebarProvider._view?.webview.postMessage({
 			type: 'selection-change',
-			value: text,
+			value: selected_code,
+			start_line: start_line,
 		});
 	}));
+
+	
 
 	// context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
 	// 	vscode.window.showInformationMessage("File changed");

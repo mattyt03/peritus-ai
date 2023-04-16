@@ -5,7 +5,10 @@
 
 
   export let code = "";
-  export let asResponse = true;
+  export let asResponse;
+  export let onReplace;
+  export let onCopy;
+
   let showButtons = false;
 
   const toggleShow = () => {
@@ -25,7 +28,9 @@
         break;
       }
     }
-    code = code.trim();
+    if (asResponse) {
+      code = code.trim();
+    }
     // console.log(code);
   }
 </script>
@@ -33,10 +38,10 @@
 <div class="outer-container" on:mouseenter={toggleShow} on:mouseleave={toggleShow}>
   {#if asResponse && showButtons}
     <div class="btn-container">
-      <button class="btn">
+      <button on:click={onCopy(code)} class="btn">
         <Fa icon={faCopy} size='1.5x' color="lightgrey"/>
       </button>
-      <button class="btn">
+      <button on:click={onReplace(code)} class="btn">
         <Fa icon={faFileImport} size='1.5x' color="lightgrey"/>
       </button>
     </div>

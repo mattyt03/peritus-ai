@@ -8,6 +8,8 @@
     export let result;
     export let id;
     export let onRemove;
+    export let onReplace;
+    export let onCopy;
 
     // TODO: does this need to be inside the $?
     let beginsWithCode = result.startsWith("```");
@@ -22,11 +24,6 @@
         // console.log(segments);
     }
 
-    // let showClose = false;
-    // const toggleShow = () => {
-    //     showClose = !showClose;
-    // }
-
 </script>
   
 <!-- on:mouseenter={toggleShow} on:mouseleave={toggleShow} -->
@@ -40,7 +37,7 @@
   <div class="response">
       {#each segments as segment, i}
           {#if i % 2 === mod}
-            <Code code={segment} />
+            <Code code={segment} asResponse={true} onCopy={onCopy} onReplace={onReplace}/>
           {:else}
             <Text text={segment} />
           {/if}

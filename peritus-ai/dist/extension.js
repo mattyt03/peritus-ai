@@ -16,6 +16,7 @@ const getNonce_1 = __webpack_require__(/*! ./getNonce */ "./src/getNonce.ts");
 class SidebarProvider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;
+        // TODO: move this to extension.ts?g
         vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (editor) {
                 this._doc = editor.document;
@@ -36,6 +37,17 @@ class SidebarProvider {
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
+                case "replace-in-file": {
+                    const editor = vscode.window.activeTextEditor;
+                    if (editor && data.value) {
+                        const document = editor.document;
+                        const selectedText = editor.selection;
+                        const workspaceEdit = new vscode.WorkspaceEdit();
+                        workspaceEdit.replace(document.uri, selectedText, data.value);
+                        await vscode.workspace.applyEdit(workspaceEdit);
+                    }
+                    break;
+                }
                 case "get-file-contents": {
                     this._view?.webview.postMessage({
                         type: "file-contents",
@@ -230,11 +242,14 @@ function activate(context) {
         // if (activeTextEditor.selection.isEmpty)
         // 	return;
         // vscode.window.showInformationMessage("Selection changed");
-        const text = activeTextEditor.document.getText(activeTextEditor.selection);
-        // console.log(text);
+        const selection = activeTextEditor.selection;
+        const selected_code = activeTextEditor.document.getText(selection);
+        // line numbers are 0-based, add 1 for display
+        const start_line = selection.start.line + 1;
         sidebarProvider._view?.webview.postMessage({
             type: 'selection-change',
-            value: text,
+            value: selected_code,
+            start_line: start_line,
         });
     }));
     // context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
