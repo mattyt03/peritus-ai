@@ -23,6 +23,7 @@ body {
 	/* background-color: var(--vscode-editor-background); */
 	/* background-color: rgb(37, 37, 38); */
 	background-color: #20172F;
+	height: 100%;
 }
 
 ol,

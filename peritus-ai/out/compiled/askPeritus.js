@@ -3162,10 +3162,646 @@ var app = (function () {
       icon: [512, 512, [], "f0c5", "M448 384H256c-35.3 0-64-28.7-64-64V64c0-35.3 28.7-64 64-64H396.1c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9V320c0 35.3-28.7 64-64 64zM64 128h96v48H64c-8.8 0-16 7.2-16 16V448c0 8.8 7.2 16 16 16H256c8.8 0 16-7.2 16-16V416h48v32c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192c0-35.3 28.7-64 64-64z"]
     };
 
+    // canvas-confetti v1.6.0 built on 2022-10-24T21:26:41.619Z
+    var module = {};
+
+    // source content
+    (function main(global, module, isWorker, workerSize) {
+      var canUseWorker = !!(
+        global.Worker &&
+        global.Blob &&
+        global.Promise &&
+        global.OffscreenCanvas &&
+        global.OffscreenCanvasRenderingContext2D &&
+        global.HTMLCanvasElement &&
+        global.HTMLCanvasElement.prototype.transferControlToOffscreen &&
+        global.URL &&
+        global.URL.createObjectURL);
+
+      function noop() {}
+
+      // create a promise if it exists, otherwise, just
+      // call the function directly
+      function promise(func) {
+        var ModulePromise = module.exports.Promise;
+        var Prom = ModulePromise !== void 0 ? ModulePromise : global.Promise;
+
+        if (typeof Prom === 'function') {
+          return new Prom(func);
+        }
+
+        func(noop, noop);
+
+        return null;
+      }
+
+      var raf = (function () {
+        var TIME = Math.floor(1000 / 60);
+        var frame, cancel;
+        var frames = {};
+        var lastFrameTime = 0;
+
+        if (typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame === 'function') {
+          frame = function (cb) {
+            var id = Math.random();
+
+            frames[id] = requestAnimationFrame(function onFrame(time) {
+              if (lastFrameTime === time || lastFrameTime + TIME - 1 < time) {
+                lastFrameTime = time;
+                delete frames[id];
+
+                cb();
+              } else {
+                frames[id] = requestAnimationFrame(onFrame);
+              }
+            });
+
+            return id;
+          };
+          cancel = function (id) {
+            if (frames[id]) {
+              cancelAnimationFrame(frames[id]);
+            }
+          };
+        } else {
+          frame = function (cb) {
+            return setTimeout(cb, TIME);
+          };
+          cancel = function (timer) {
+            return clearTimeout(timer);
+          };
+        }
+
+        return { frame: frame, cancel: cancel };
+      }());
+
+      var getWorker = (function () {
+        var worker;
+        var prom;
+        var resolves = {};
+
+        function decorate(worker) {
+          function execute(options, callback) {
+            worker.postMessage({ options: options || {}, callback: callback });
+          }
+          worker.init = function initWorker(canvas) {
+            var offscreen = canvas.transferControlToOffscreen();
+            worker.postMessage({ canvas: offscreen }, [offscreen]);
+          };
+
+          worker.fire = function fireWorker(options, size, done) {
+            if (prom) {
+              execute(options, null);
+              return prom;
+            }
+
+            var id = Math.random().toString(36).slice(2);
+
+            prom = promise(function (resolve) {
+              function workerDone(msg) {
+                if (msg.data.callback !== id) {
+                  return;
+                }
+
+                delete resolves[id];
+                worker.removeEventListener('message', workerDone);
+
+                prom = null;
+                done();
+                resolve();
+              }
+
+              worker.addEventListener('message', workerDone);
+              execute(options, id);
+
+              resolves[id] = workerDone.bind(null, { data: { callback: id }});
+            });
+
+            return prom;
+          };
+
+          worker.reset = function resetWorker() {
+            worker.postMessage({ reset: true });
+
+            for (var id in resolves) {
+              resolves[id]();
+              delete resolves[id];
+            }
+          };
+        }
+
+        return function () {
+          if (worker) {
+            return worker;
+          }
+
+          if (!isWorker && canUseWorker) {
+            var code = [
+              'var CONFETTI, SIZE = {}, module = {};',
+              '(' + main.toString() + ')(this, module, true, SIZE);',
+              'onmessage = function(msg) {',
+              '  if (msg.data.options) {',
+              '    CONFETTI(msg.data.options).then(function () {',
+              '      if (msg.data.callback) {',
+              '        postMessage({ callback: msg.data.callback });',
+              '      }',
+              '    });',
+              '  } else if (msg.data.reset) {',
+              '    CONFETTI && CONFETTI.reset();',
+              '  } else if (msg.data.resize) {',
+              '    SIZE.width = msg.data.resize.width;',
+              '    SIZE.height = msg.data.resize.height;',
+              '  } else if (msg.data.canvas) {',
+              '    SIZE.width = msg.data.canvas.width;',
+              '    SIZE.height = msg.data.canvas.height;',
+              '    CONFETTI = module.exports.create(msg.data.canvas);',
+              '  }',
+              '}',
+            ].join('\n');
+            try {
+              worker = new Worker(URL.createObjectURL(new Blob([code])));
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              typeof console !== undefined && typeof console.warn === 'function' ? console.warn('🎊 Could not load worker', e) : null;
+
+              return null;
+            }
+
+            decorate(worker);
+          }
+
+          return worker;
+        };
+      })();
+
+      var defaults = {
+        particleCount: 50,
+        angle: 90,
+        spread: 45,
+        startVelocity: 45,
+        decay: 0.9,
+        gravity: 1,
+        drift: 0,
+        ticks: 200,
+        x: 0.5,
+        y: 0.5,
+        shapes: ['square', 'circle'],
+        zIndex: 100,
+        colors: [
+          '#26ccff',
+          '#a25afd',
+          '#ff5e7e',
+          '#88ff5a',
+          '#fcff42',
+          '#ffa62d',
+          '#ff36ff'
+        ],
+        // probably should be true, but back-compat
+        disableForReducedMotion: false,
+        scalar: 1
+      };
+
+      function convert(val, transform) {
+        return transform ? transform(val) : val;
+      }
+
+      function isOk(val) {
+        return !(val === null || val === undefined);
+      }
+
+      function prop(options, name, transform) {
+        return convert(
+          options && isOk(options[name]) ? options[name] : defaults[name],
+          transform
+        );
+      }
+
+      function onlyPositiveInt(number){
+        return number < 0 ? 0 : Math.floor(number);
+      }
+
+      function randomInt(min, max) {
+        // [min, max)
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
+
+      function toDecimal(str) {
+        return parseInt(str, 16);
+      }
+
+      function colorsToRgb(colors) {
+        return colors.map(hexToRgb);
+      }
+
+      function hexToRgb(str) {
+        var val = String(str).replace(/[^0-9a-f]/gi, '');
+
+        if (val.length < 6) {
+            val = val[0]+val[0]+val[1]+val[1]+val[2]+val[2];
+        }
+
+        return {
+          r: toDecimal(val.substring(0,2)),
+          g: toDecimal(val.substring(2,4)),
+          b: toDecimal(val.substring(4,6))
+        };
+      }
+
+      function getOrigin(options) {
+        var origin = prop(options, 'origin', Object);
+        origin.x = prop(origin, 'x', Number);
+        origin.y = prop(origin, 'y', Number);
+
+        return origin;
+      }
+
+      function setCanvasWindowSize(canvas) {
+        canvas.width = document.documentElement.clientWidth;
+        canvas.height = document.documentElement.clientHeight;
+      }
+
+      function setCanvasRectSize(canvas) {
+        var rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+
+      function getCanvas(zIndex) {
+        var canvas = document.createElement('canvas');
+
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0px';
+        canvas.style.left = '0px';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = zIndex;
+
+        return canvas;
+      }
+
+      function ellipse(context, x, y, radiusX, radiusY, rotation, startAngle, endAngle, antiClockwise) {
+        context.save();
+        context.translate(x, y);
+        context.rotate(rotation);
+        context.scale(radiusX, radiusY);
+        context.arc(0, 0, 1, startAngle, endAngle, antiClockwise);
+        context.restore();
+      }
+
+      function randomPhysics(opts) {
+        var radAngle = opts.angle * (Math.PI / 180);
+        var radSpread = opts.spread * (Math.PI / 180);
+
+        return {
+          x: opts.x,
+          y: opts.y,
+          wobble: Math.random() * 10,
+          wobbleSpeed: Math.min(0.11, Math.random() * 0.1 + 0.05),
+          velocity: (opts.startVelocity * 0.5) + (Math.random() * opts.startVelocity),
+          angle2D: -radAngle + ((0.5 * radSpread) - (Math.random() * radSpread)),
+          tiltAngle: (Math.random() * (0.75 - 0.25) + 0.25) * Math.PI,
+          color: opts.color,
+          shape: opts.shape,
+          tick: 0,
+          totalTicks: opts.ticks,
+          decay: opts.decay,
+          drift: opts.drift,
+          random: Math.random() + 2,
+          tiltSin: 0,
+          tiltCos: 0,
+          wobbleX: 0,
+          wobbleY: 0,
+          gravity: opts.gravity * 3,
+          ovalScalar: 0.6,
+          scalar: opts.scalar
+        };
+      }
+
+      function updateFetti(context, fetti) {
+        fetti.x += Math.cos(fetti.angle2D) * fetti.velocity + fetti.drift;
+        fetti.y += Math.sin(fetti.angle2D) * fetti.velocity + fetti.gravity;
+        fetti.wobble += fetti.wobbleSpeed;
+        fetti.velocity *= fetti.decay;
+        fetti.tiltAngle += 0.1;
+        fetti.tiltSin = Math.sin(fetti.tiltAngle);
+        fetti.tiltCos = Math.cos(fetti.tiltAngle);
+        fetti.random = Math.random() + 2;
+        fetti.wobbleX = fetti.x + ((10 * fetti.scalar) * Math.cos(fetti.wobble));
+        fetti.wobbleY = fetti.y + ((10 * fetti.scalar) * Math.sin(fetti.wobble));
+
+        var progress = (fetti.tick++) / fetti.totalTicks;
+
+        var x1 = fetti.x + (fetti.random * fetti.tiltCos);
+        var y1 = fetti.y + (fetti.random * fetti.tiltSin);
+        var x2 = fetti.wobbleX + (fetti.random * fetti.tiltCos);
+        var y2 = fetti.wobbleY + (fetti.random * fetti.tiltSin);
+
+        context.fillStyle = 'rgba(' + fetti.color.r + ', ' + fetti.color.g + ', ' + fetti.color.b + ', ' + (1 - progress) + ')';
+        context.beginPath();
+
+        if (fetti.shape === 'circle') {
+          context.ellipse ?
+            context.ellipse(fetti.x, fetti.y, Math.abs(x2 - x1) * fetti.ovalScalar, Math.abs(y2 - y1) * fetti.ovalScalar, Math.PI / 10 * fetti.wobble, 0, 2 * Math.PI) :
+            ellipse(context, fetti.x, fetti.y, Math.abs(x2 - x1) * fetti.ovalScalar, Math.abs(y2 - y1) * fetti.ovalScalar, Math.PI / 10 * fetti.wobble, 0, 2 * Math.PI);
+        } else if (fetti.shape === 'star') {
+          var rot = Math.PI / 2 * 3;
+          var innerRadius = 4 * fetti.scalar;
+          var outerRadius = 8 * fetti.scalar;
+          var x = fetti.x;
+          var y = fetti.y;
+          var spikes = 5;
+          var step = Math.PI / spikes;
+
+          while (spikes--) {
+            x = fetti.x + Math.cos(rot) * outerRadius;
+            y = fetti.y + Math.sin(rot) * outerRadius;
+            context.lineTo(x, y);
+            rot += step;
+
+            x = fetti.x + Math.cos(rot) * innerRadius;
+            y = fetti.y + Math.sin(rot) * innerRadius;
+            context.lineTo(x, y);
+            rot += step;
+          }
+        } else {
+          context.moveTo(Math.floor(fetti.x), Math.floor(fetti.y));
+          context.lineTo(Math.floor(fetti.wobbleX), Math.floor(y1));
+          context.lineTo(Math.floor(x2), Math.floor(y2));
+          context.lineTo(Math.floor(x1), Math.floor(fetti.wobbleY));
+        }
+
+        context.closePath();
+        context.fill();
+
+        return fetti.tick < fetti.totalTicks;
+      }
+
+      function animate(canvas, fettis, resizer, size, done) {
+        var animatingFettis = fettis.slice();
+        var context = canvas.getContext('2d');
+        var animationFrame;
+        var destroy;
+
+        var prom = promise(function (resolve) {
+          function onDone() {
+            animationFrame = destroy = null;
+
+            context.clearRect(0, 0, size.width, size.height);
+
+            done();
+            resolve();
+          }
+
+          function update() {
+            if (isWorker && !(size.width === workerSize.width && size.height === workerSize.height)) {
+              size.width = canvas.width = workerSize.width;
+              size.height = canvas.height = workerSize.height;
+            }
+
+            if (!size.width && !size.height) {
+              resizer(canvas);
+              size.width = canvas.width;
+              size.height = canvas.height;
+            }
+
+            context.clearRect(0, 0, size.width, size.height);
+
+            animatingFettis = animatingFettis.filter(function (fetti) {
+              return updateFetti(context, fetti);
+            });
+
+            if (animatingFettis.length) {
+              animationFrame = raf.frame(update);
+            } else {
+              onDone();
+            }
+          }
+
+          animationFrame = raf.frame(update);
+          destroy = onDone;
+        });
+
+        return {
+          addFettis: function (fettis) {
+            animatingFettis = animatingFettis.concat(fettis);
+
+            return prom;
+          },
+          canvas: canvas,
+          promise: prom,
+          reset: function () {
+            if (animationFrame) {
+              raf.cancel(animationFrame);
+            }
+
+            if (destroy) {
+              destroy();
+            }
+          }
+        };
+      }
+
+      function confettiCannon(canvas, globalOpts) {
+        var isLibCanvas = !canvas;
+        var allowResize = !!prop(globalOpts || {}, 'resize');
+        var globalDisableForReducedMotion = prop(globalOpts, 'disableForReducedMotion', Boolean);
+        var shouldUseWorker = canUseWorker && !!prop(globalOpts || {}, 'useWorker');
+        var worker = shouldUseWorker ? getWorker() : null;
+        var resizer = isLibCanvas ? setCanvasWindowSize : setCanvasRectSize;
+        var initialized = (canvas && worker) ? !!canvas.__confetti_initialized : false;
+        var preferLessMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion)').matches;
+        var animationObj;
+
+        function fireLocal(options, size, done) {
+          var particleCount = prop(options, 'particleCount', onlyPositiveInt);
+          var angle = prop(options, 'angle', Number);
+          var spread = prop(options, 'spread', Number);
+          var startVelocity = prop(options, 'startVelocity', Number);
+          var decay = prop(options, 'decay', Number);
+          var gravity = prop(options, 'gravity', Number);
+          var drift = prop(options, 'drift', Number);
+          var colors = prop(options, 'colors', colorsToRgb);
+          var ticks = prop(options, 'ticks', Number);
+          var shapes = prop(options, 'shapes');
+          var scalar = prop(options, 'scalar');
+          var origin = getOrigin(options);
+
+          var temp = particleCount;
+          var fettis = [];
+
+          var startX = canvas.width * origin.x;
+          var startY = canvas.height * origin.y;
+
+          while (temp--) {
+            fettis.push(
+              randomPhysics({
+                x: startX,
+                y: startY,
+                angle: angle,
+                spread: spread,
+                startVelocity: startVelocity,
+                color: colors[temp % colors.length],
+                shape: shapes[randomInt(0, shapes.length)],
+                ticks: ticks,
+                decay: decay,
+                gravity: gravity,
+                drift: drift,
+                scalar: scalar
+              })
+            );
+          }
+
+          // if we have a previous canvas already animating,
+          // add to it
+          if (animationObj) {
+            return animationObj.addFettis(fettis);
+          }
+
+          animationObj = animate(canvas, fettis, resizer, size , done);
+
+          return animationObj.promise;
+        }
+
+        function fire(options) {
+          var disableForReducedMotion = globalDisableForReducedMotion || prop(options, 'disableForReducedMotion', Boolean);
+          var zIndex = prop(options, 'zIndex', Number);
+
+          if (disableForReducedMotion && preferLessMotion) {
+            return promise(function (resolve) {
+              resolve();
+            });
+          }
+
+          if (isLibCanvas && animationObj) {
+            // use existing canvas from in-progress animation
+            canvas = animationObj.canvas;
+          } else if (isLibCanvas && !canvas) {
+            // create and initialize a new canvas
+            canvas = getCanvas(zIndex);
+            document.body.appendChild(canvas);
+          }
+
+          if (allowResize && !initialized) {
+            // initialize the size of a user-supplied canvas
+            resizer(canvas);
+          }
+
+          var size = {
+            width: canvas.width,
+            height: canvas.height
+          };
+
+          if (worker && !initialized) {
+            worker.init(canvas);
+          }
+
+          initialized = true;
+
+          if (worker) {
+            canvas.__confetti_initialized = true;
+          }
+
+          function onResize() {
+            if (worker) {
+              // TODO this really shouldn't be immediate, because it is expensive
+              var obj = {
+                getBoundingClientRect: function () {
+                  if (!isLibCanvas) {
+                    return canvas.getBoundingClientRect();
+                  }
+                }
+              };
+
+              resizer(obj);
+
+              worker.postMessage({
+                resize: {
+                  width: obj.width,
+                  height: obj.height
+                }
+              });
+              return;
+            }
+
+            // don't actually query the size here, since this
+            // can execute frequently and rapidly
+            size.width = size.height = null;
+          }
+
+          function done() {
+            animationObj = null;
+
+            if (allowResize) {
+              global.removeEventListener('resize', onResize);
+            }
+
+            if (isLibCanvas && canvas) {
+              document.body.removeChild(canvas);
+              canvas = null;
+              initialized = false;
+            }
+          }
+
+          if (allowResize) {
+            global.addEventListener('resize', onResize, false);
+          }
+
+          if (worker) {
+            return worker.fire(options, size, done);
+          }
+
+          return fireLocal(options, size, done);
+        }
+
+        fire.reset = function () {
+          if (worker) {
+            worker.reset();
+          }
+
+          if (animationObj) {
+            animationObj.reset();
+          }
+        };
+
+        return fire;
+      }
+
+      // Make default export lazy to defer worker creation until called.
+      var defaultFire;
+      function getDefaultFire() {
+        if (!defaultFire) {
+          defaultFire = confettiCannon(null, { useWorker: true, resize: true });
+        }
+        return defaultFire;
+      }
+
+      module.exports = function() {
+        return getDefaultFire().apply(this, arguments);
+      };
+      module.exports.reset = function() {
+        getDefaultFire().reset();
+      };
+      module.exports.create = confettiCannon;
+    }((function () {
+      if (typeof window !== 'undefined') {
+        return window;
+      }
+
+      if (typeof self !== 'undefined') {
+        return self;
+      }
+
+      return this || {};
+    })(), module, false));
+
+    // end source content
+
+    var confetti = module.exports;
+    module.exports.create;
+
     /* webviews/components/Code.svelte generated by Svelte v3.55.1 */
     const file$1 = "webviews/components/Code.svelte";
 
-    // (39:2) {#if asResponse && showButtons}
+    // (63:2) {#if asResponse && showButtons}
     function create_if_block$1(ctx) {
     	let div;
     	let button0;
@@ -3204,11 +3840,11 @@ var app = (function () {
     			button1 = element("button");
     			create_component(fa1.$$.fragment);
     			attr_dev(button0, "class", "btn svelte-182cie6");
-    			add_location(button0, file$1, 40, 6, 1011);
+    			add_location(button0, file$1, 64, 6, 1723);
     			attr_dev(button1, "class", "btn svelte-182cie6");
-    			add_location(button1, file$1, 43, 6, 1136);
+    			add_location(button1, file$1, 67, 6, 1848);
     			attr_dev(div, "class", "btn-container svelte-182cie6");
-    			add_location(div, file$1, 39, 4, 977);
+    			add_location(div, file$1, 63, 4, 1689);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3217,6 +3853,7 @@ var app = (function () {
     			append_dev(div, t);
     			append_dev(div, button1);
     			mount_component(fa1, button1, null);
+    			/*button1_binding*/ ctx[10](button1);
     			current = true;
 
     			if (!mounted) {
@@ -3225,22 +3862,13 @@ var app = (function () {
     						button0,
     						"click",
     						function () {
-    							if (is_function(/*onCopy*/ ctx[3](/*code*/ ctx[0]))) /*onCopy*/ ctx[3](/*code*/ ctx[0]).apply(this, arguments);
+    							if (is_function(/*onCopy*/ ctx[2](/*code*/ ctx[0]))) /*onCopy*/ ctx[2](/*code*/ ctx[0]).apply(this, arguments);
     						},
     						false,
     						false,
     						false
     					),
-    					listen_dev(
-    						button1,
-    						"click",
-    						function () {
-    							if (is_function(/*onReplace*/ ctx[2](/*code*/ ctx[0]))) /*onReplace*/ ctx[2](/*code*/ ctx[0]).apply(this, arguments);
-    						},
-    						false,
-    						false,
-    						false
-    					)
+    					listen_dev(button1, "click", /*click_handler*/ ctx[9], false, false, false)
     				];
 
     				mounted = true;
@@ -3264,6 +3892,7 @@ var app = (function () {
     			if (detaching) detach_dev(div);
     			destroy_component(fa0);
     			destroy_component(fa1);
+    			/*button1_binding*/ ctx[10](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -3273,7 +3902,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(39:2) {#if asResponse && showButtons}",
+    		source: "(63:2) {#if asResponse && showButtons}",
     		ctx
     	});
 
@@ -3286,11 +3915,11 @@ var app = (function () {
     	let div1;
     	let div0;
     	let code_1;
-    	let raw_value = Prism.highlight(/*code*/ ctx[0], Prism.languages[/*language*/ ctx[6]]) + "";
+    	let raw_value = Prism.highlight(/*code*/ ctx[0], Prism.languages[/*language*/ ctx[7]]) + "";
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block = /*asResponse*/ ctx[1] && /*showButtons*/ ctx[4] && create_if_block$1(ctx);
+    	let if_block = /*asResponse*/ ctx[1] && /*showButtons*/ ctx[3] && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
@@ -3301,14 +3930,14 @@ var app = (function () {
     			div0 = element("div");
     			code_1 = element("code");
     			attr_dev(code_1, "class", "svelte-182cie6");
-    			add_location(code_1, file$1, 51, 6, 1400);
+    			add_location(code_1, file$1, 75, 6, 2136);
     			attr_dev(div0, "class", "inner-container svelte-182cie6");
-    			add_location(div0, file$1, 49, 4, 1330);
+    			add_location(div0, file$1, 73, 4, 2066);
     			attr_dev(div1, "class", "svelte-182cie6");
     			toggle_class(div1, "border-radius", /*asResponse*/ ctx[1]);
-    			add_location(div1, file$1, 48, 2, 1285);
+    			add_location(div1, file$1, 72, 2, 2021);
     			attr_dev(div2, "class", "outer-container svelte-182cie6");
-    			add_location(div2, file$1, 37, 0, 855);
+    			add_location(div2, file$1, 61, 0, 1567);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3333,11 +3962,11 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*asResponse*/ ctx[1] && /*showButtons*/ ctx[4]) {
+    			if (/*asResponse*/ ctx[1] && /*showButtons*/ ctx[3]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
 
-    					if (dirty & /*asResponse, showButtons*/ 18) {
+    					if (dirty & /*asResponse, showButtons*/ 10) {
     						transition_in(if_block, 1);
     					}
     				} else {
@@ -3356,7 +3985,7 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if ((!current || dirty & /*code*/ 1) && raw_value !== (raw_value = Prism.highlight(/*code*/ ctx[0], Prism.languages[/*language*/ ctx[6]]) + "")) code_1.innerHTML = raw_value;
+    			if ((!current || dirty & /*code*/ 1) && raw_value !== (raw_value = Prism.highlight(/*code*/ ctx[0], Prism.languages[/*language*/ ctx[7]]) + "")) code_1.innerHTML = raw_value;
     			if (!current || dirty & /*asResponse*/ 2) {
     				toggle_class(div1, "border-radius", /*asResponse*/ ctx[1]);
     			}
@@ -3397,9 +4026,33 @@ var app = (function () {
     	let { onReplace } = $$props;
     	let { onCopy } = $$props;
     	let showButtons = false;
+    	let btn;
 
     	const toggleShow = () => {
-    		$$invalidate(4, showButtons = !showButtons);
+    		$$invalidate(3, showButtons = !showButtons);
+    	};
+
+    	const handleReplace = async event => {
+    		onReplace(code);
+    		await confetti(createConfettiOptions(event));
+    	};
+
+    	const createConfettiOptions = event => {
+    		const button = event.currentTarget;
+    		const buttonRect = button.getBoundingClientRect();
+    		const originX = buttonRect.left + buttonRect.width / 2;
+    		const originY = buttonRect.top + buttonRect.height / 2;
+
+    		return {
+    			particleCount: 50,
+    			startVelocity: 15,
+    			ticks: 50,
+    			spread: 360,
+    			origin: {
+    				x: originX / window.innerWidth,
+    				y: originY / window.innerHeight
+    			}
+    		};
     	};
 
     	// TODO: change language
@@ -3409,16 +4062,23 @@ var app = (function () {
     	// JavaScript also won't get recognized
     	let languages = [
     		"python",
+    		"Python",
     		"javascript",
+    		"JavaScript",
     		"java",
+    		"Java",
     		"html",
     		"css",
     		"c++",
-    		'bash',
-    		'jsx',
-    		'golang',
-    		'go',
-    		'js'
+    		"C++",
+    		"bash",
+    		"Bash",
+    		"jsx",
+    		"golang",
+    		"Golang",
+    		"go",
+    		"Go",
+    		"js"
     	];
 
     	$$self.$$.on_mount.push(function () {
@@ -3441,11 +4101,20 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Code> was created with unknown prop '${key}'`);
     	});
 
+    	const click_handler = e => handleReplace(e);
+
+    	function button1_binding($$value) {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+    			btn = $$value;
+    			$$invalidate(4, btn);
+    		});
+    	}
+
     	$$self.$$set = $$props => {
     		if ('code' in $$props) $$invalidate(0, code = $$props.code);
     		if ('asResponse' in $$props) $$invalidate(1, asResponse = $$props.asResponse);
-    		if ('onReplace' in $$props) $$invalidate(2, onReplace = $$props.onReplace);
-    		if ('onCopy' in $$props) $$invalidate(3, onCopy = $$props.onCopy);
+    		if ('onReplace' in $$props) $$invalidate(8, onReplace = $$props.onReplace);
+    		if ('onCopy' in $$props) $$invalidate(2, onCopy = $$props.onCopy);
     	};
 
     	$$self.$capture_state = () => ({
@@ -3453,12 +4122,16 @@ var app = (function () {
     		Fa,
     		faCopy,
     		faFileImport,
+    		confetti,
     		code,
     		asResponse,
     		onReplace,
     		onCopy,
     		showButtons,
+    		btn,
     		toggleShow,
+    		handleReplace,
+    		createConfettiOptions,
     		language,
     		languages
     	});
@@ -3466,11 +4139,12 @@ var app = (function () {
     	$$self.$inject_state = $$props => {
     		if ('code' in $$props) $$invalidate(0, code = $$props.code);
     		if ('asResponse' in $$props) $$invalidate(1, asResponse = $$props.asResponse);
-    		if ('onReplace' in $$props) $$invalidate(2, onReplace = $$props.onReplace);
-    		if ('onCopy' in $$props) $$invalidate(3, onCopy = $$props.onCopy);
-    		if ('showButtons' in $$props) $$invalidate(4, showButtons = $$props.showButtons);
-    		if ('language' in $$props) $$invalidate(6, language = $$props.language);
-    		if ('languages' in $$props) $$invalidate(7, languages = $$props.languages);
+    		if ('onReplace' in $$props) $$invalidate(8, onReplace = $$props.onReplace);
+    		if ('onCopy' in $$props) $$invalidate(2, onCopy = $$props.onCopy);
+    		if ('showButtons' in $$props) $$invalidate(3, showButtons = $$props.showButtons);
+    		if ('btn' in $$props) $$invalidate(4, btn = $$props.btn);
+    		if ('language' in $$props) $$invalidate(7, language = $$props.language);
+    		if ('languages' in $$props) $$invalidate(12, languages = $$props.languages);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -3494,7 +4168,19 @@ var app = (function () {
     		}
     	};
 
-    	return [code, asResponse, onReplace, onCopy, showButtons, toggleShow, language];
+    	return [
+    		code,
+    		asResponse,
+    		onCopy,
+    		showButtons,
+    		btn,
+    		toggleShow,
+    		handleReplace,
+    		language,
+    		onReplace,
+    		click_handler,
+    		button1_binding
+    	];
     }
 
     class Code extends SvelteComponentDev {
@@ -3504,8 +4190,8 @@ var app = (function () {
     		init(this, options, instance$1, create_fragment$1, safe_not_equal, {
     			code: 0,
     			asResponse: 1,
-    			onReplace: 2,
-    			onCopy: 3
+    			onReplace: 8,
+    			onCopy: 2
     		});
 
     		dispatch_dev("SvelteRegisterComponent", {
@@ -3566,11 +4252,11 @@ var app = (function () {
     			t = space();
     			div = element("div");
     			attr_dev(input, "type", "text");
-    			attr_dev(input, "class", "input-box svelte-1mbbg6r");
+    			attr_dev(input, "class", "input-box svelte-4ulx3l");
     			attr_dev(input, "placeholder", "Ask Peritus...");
-    			add_location(input, file, 69, 4, 1368);
-    			attr_dev(div, "class", "white-box svelte-1mbbg6r");
-    			add_location(div, file, 70, 4, 1462);
+    			add_location(input, file, 69, 4, 1369);
+    			attr_dev(div, "class", "white-box svelte-4ulx3l");
+    			add_location(div, file, 70, 4, 1463);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -3621,14 +4307,14 @@ var app = (function () {
     			input = element("input");
     			t2 = space();
     			div1 = element("div");
-    			attr_dev(div0, "class", "header svelte-1mbbg6r");
-    			add_location(div0, file, 65, 4, 1190);
+    			attr_dev(div0, "class", "header svelte-4ulx3l");
+    			add_location(div0, file, 65, 4, 1191);
     			attr_dev(input, "type", "text");
-    			attr_dev(input, "class", "input-box svelte-1mbbg6r");
+    			attr_dev(input, "class", "input-box svelte-4ulx3l");
     			attr_dev(input, "placeholder", "Ask Peritus...");
-    			add_location(input, file, 66, 4, 1228);
-    			attr_dev(div1, "class", "white-box svelte-1mbbg6r");
-    			add_location(div1, file, 67, 4, 1322);
+    			add_location(input, file, 66, 4, 1229);
+    			attr_dev(div1, "class", "white-box svelte-4ulx3l");
+    			add_location(div1, file, 67, 4, 1323);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -3680,8 +4366,8 @@ var app = (function () {
     		c: function create() {
     			div = element("div");
     			if_block.c();
-    			attr_dev(div, "class", "black-box svelte-1mbbg6r");
-    			add_location(div, file, 63, 2, 1137);
+    			attr_dev(div, "class", "black-box svelte-4ulx3l");
+    			add_location(div, file, 63, 2, 1138);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

@@ -31,7 +31,7 @@
     text-align: center;
   }
 
-  .input-box{
+  .input-box {
     position: absolute;
     top: 50%;
     left: 50%;

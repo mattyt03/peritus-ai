@@ -96,11 +96,14 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/pro-regular-svg-icons": "^6.4.0",
     "@rollup/plugin-terser": "^0.4.0",
+    "canvas-confetti": "^1.6.0",
     "openai": "^3.2.1",
     "prismjs": "^1.29.0",
     "rollup": "^3.20.0",
     "rollup-plugin-svelte": "^6.1.1",
+    "rollup-plugin-svg": "^2.0.0",
     "sse": "github:mpetazzoni/sse.js",
-    "svelte-fa": "^3.0.3"
+    "svelte-fa": "^3.0.3",
+    "svelte-inline-svg": "^1.2.0"
   }
 }

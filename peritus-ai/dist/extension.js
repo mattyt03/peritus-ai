@@ -16,7 +16,7 @@ const getNonce_1 = __webpack_require__(/*! ./getNonce */ "./src/getNonce.ts");
 class SidebarProvider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;
-        // TODO: move this to extension.ts?g
+        // TODO: move this to extension.ts?
         vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (editor) {
                 this._doc = editor.document;
@@ -78,14 +78,14 @@ class SidebarProvider {
         const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
         const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
         const stylePrismUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "prism.css"));
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.js"));
+        const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.css"));
         // const scriptUri = webview.asWebviewUri(
-        //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.js")
+        //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.js")
         // );
         // const styleMainUri = webview.asWebviewUri(
-        //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.css")
+        //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.css")
         // );
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.js"));
-        const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.css"));
         // Use a nonce to only allow a specific script to be run.
         const nonce = (0, getNonce_1.default)();
         return `<!DOCTYPE html>
@@ -96,8 +96,8 @@ class SidebarProvider {
 					Use a content security policy to only allow loading images from https or from our extension directory,
 					and only allow scripts that have a specific nonce.
         -->
-        <meta http-equiv="Content-Security-Policy" content="img-src https: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src 'nonce-${nonce}';">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Security-Policy" content="img-src https: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src 'nonce-${nonce}';">
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">
         <link href="${stylePrismUri}" rel="stylesheet">
@@ -107,7 +107,7 @@ class SidebarProvider {
         </script>
 			</head>
       <body>
-				<script nonce="${nonce}" src="${scriptUri}"></script>
+				<script nonce="${nonce}" src="${scriptUri}" ></script>
 			</body>
 			</html>`;
     }

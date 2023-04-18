@@ -6,7 +6,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   _doc?: vscode.TextDocument;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
-    // TODO: move this to extension.ts?g
+    // TODO: move this to extension.ts?
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
         this._doc = editor.document;
@@ -85,19 +85,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, "media", "prism.css")
     );
 
-    // const scriptUri = webview.asWebviewUri(
-    //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.js")
-    // );
-    // const styleMainUri = webview.asWebviewUri(
-    //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.css")
-    // );
-
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.js")
+      vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.js")
     );
     const styleMainUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.css")
+      vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.css")
     );
+
+    // const scriptUri = webview.asWebviewUri(
+    //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.js")
+    // );
+    // const styleMainUri = webview.asWebviewUri(
+    //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/askPeritus.css")
+    // );
 
     // Use a nonce to only allow a specific script to be run.
     const nonce = getNonce();
@@ -110,8 +110,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 					Use a content security policy to only allow loading images from https or from our extension directory,
 					and only allow scripts that have a specific nonce.
         -->
-        <meta http-equiv="Content-Security-Policy" content="img-src https: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src 'nonce-${nonce}';">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Security-Policy" content="img-src https: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src 'nonce-${nonce}';">
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">
         <link href="${stylePrismUri}" rel="stylesheet">
@@ -121,7 +121,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         </script>
 			</head>
       <body>
-				<script nonce="${nonce}" src="${scriptUri}"></script>
+				<script nonce="${nonce}" src="${scriptUri}" ></script>
 			</body>
 			</html>`;
   }

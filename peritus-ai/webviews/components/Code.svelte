@@ -2,7 +2,7 @@
   import Prism from "prismjs";
   import Fa from 'svelte-fa';
   import { faCopy, faFileImport} from '@fortawesome/pro-regular-svg-icons'
-
+  import confetti from "canvas-confetti";
 
   export let code = "";
   export let asResponse;
@@ -10,16 +10,40 @@
   export let onCopy;
 
   let showButtons = false;
+  let btn;
 
   const toggleShow = () => {
     showButtons = !showButtons;
+  }
+
+  const handleReplace = async (event) => {
+    onReplace(code);
+    await confetti(createConfettiOptions(event));
+  }
+
+  const createConfettiOptions = (event) => {
+    const button = event.currentTarget;
+    const buttonRect = button.getBoundingClientRect();
+    const originX = buttonRect.left + buttonRect.width / 2;
+    const originY = buttonRect.top + buttonRect.height / 2;
+
+    return {
+      particleCount: 50,
+      startVelocity: 15,
+      ticks: 50,
+      spread: 360,
+      origin: {
+        x: originX / window.innerWidth,
+        y: originY / window.innerHeight,
+      },
+    };
   }
 
   // TODO: change language
   let language = "javascript";
   // c causes some problems
   // JavaScript also won't get recognized
-  let languages = ["python", "javascript", "java", "html", "css", "c++", 'bash', 'jsx', 'golang', 'go', 'js']
+  let languages = ["python", "Python", "javascript", "JavaScript", "java", "Java", "html", "css", "c++", "C++", "bash", "Bash", "jsx", "golang", "Golang", "go", "Go", "js"]
 
   $ : {
     for (let lang of languages) {
@@ -41,7 +65,7 @@
       <button on:click={onCopy(code)} class="btn">
         <Fa icon={faCopy} size='1.5x' color="lightgrey"/>
       </button>
-      <button on:click={onReplace(code)} class="btn">
+      <button on:click={(e) => handleReplace(e)} class="btn" bind:this={btn}>
         <Fa icon={faFileImport} size='1.5x' color="lightgrey"/>
       </button>
     </div>
