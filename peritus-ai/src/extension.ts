@@ -55,7 +55,14 @@ export function activate(context: vscode.ExtensionContext) {
 			// }, 500);
 		})
 	);
-
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand('peritus-ai.error', async () => {
+			vscode.commands.onError(async () => {
+				vscode.commands.showErrorMessage("Error Found! Debug with Peritus?", "Yes", "No")
+			})
+		})
+	);
 	// context.subscriptions.push(
 	// 	vscode.commands.registerCommand('peritus-ai.addTodo', async () => {
 	// 		const {activeTextEditor} = vscode.window;
