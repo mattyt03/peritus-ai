@@ -17,6 +17,11 @@
   }
 
   const handleReplace = async (event) => {
+    // const success = await onReplace(code);
+    // if (!success) {
+    //   // confetti(createConfettiOptions(event));
+    //   return;
+    // }
     onReplace(code);
     await confetti(createConfettiOptions(event));
   }
@@ -43,7 +48,7 @@
   let language = "javascript";
   // c causes some problems
   // JavaScript also won't get recognized
-  let languages = ["python", "Python", "javascript", "JavaScript", "java", "Java", "html", "css", "c++", "C++", "bash", "Bash", "jsx", "golang", "Golang", "go", "Go", "js"]
+  let languages = ["python", "Python", "javascript", "JavaScript", "java", "Java", "html", "css", "c++", "C++", "cpp", "bash", "Bash", "jsx", "golang", "Golang", "go", "Go", "js"]
 
   $ : {
     for (let lang of languages) {
@@ -59,6 +64,7 @@
   }
 </script>
 
+<!-- TODO: mouseenter and mouseleave are buggin -->
 <div class="outer-container" on:mouseenter={toggleShow} on:mouseleave={toggleShow}>
   {#if asResponse && showButtons}
     <div class="btn-container">
@@ -72,7 +78,6 @@
   {/if}
   <div class:border-radius="{asResponse}">
     <div class="inner-container">
-      <!-- what is a pre tag? -->
       <code>
         {@html Prism.highlight(code, Prism.languages[language])}
       </code>

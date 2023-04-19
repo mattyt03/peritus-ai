@@ -5,9 +5,8 @@
   import Response from "./Response.svelte";
   import { SSE } from "sse";
   import Examples from "./Examples.svelte";
-  export let imageUri;
-
   // import { glob } from 'glob';
+
   const API_KEY = "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"
 
   const configuration = new Configuration({
@@ -15,14 +14,19 @@
   });
   const openai = new OpenAIApi(configuration);
 
-  // TODO: set initial values
   let selected_code = "";
-  let start_line = null;
-  let end_line = null;
   let prompt = "";
-  let loading = false;
+  // let loading = false;
   let result = "";
-  let scope = "Selection Context";
+  let scope = "No Context";
+  // TODO: this will only execute if the scope has changed right?
+  $ : {
+    if (scope === "Selection Context") {
+      setSelectedCode();
+    }
+  }
+  let streaming = false;
+  let sse_connection;
   // you don't really need two separate data structures for this
   // let responses = [{ id: -1, prompt: "Sample prompt", result: "Here is some code: ```some code```"}];
   let responses = [];
@@ -35,6 +39,9 @@
   const model = 'gpt-3.5-turbo' // 'gpt-4'
 
   const add_line_numbers = (code, start_line) => {
+    if (code === "") {
+      return "";
+    }
     const lines = code.split("\n");
     // make line numbers right-aligned
     const end_line = start_line + lines.length - 1;
@@ -52,15 +59,8 @@
           // it's kinda inefficient to listen to this message even if the context isn't selection
           // maybe we should declare the scope in the extension and pass it to the webview?
           if (scope === "Selection Context") {
-            // selected_code = message.value;
-            // start_line = message.start_line;
-            // end_line = message.end_line;
-            if (message.value === "") {
-              selected_code = "";
-              break;
-            }
             selected_code = add_line_numbers(message.value, message.start_line);
-            } 
+          } 
           break;
       }
     });
@@ -87,14 +87,13 @@
   //   // console.log(prompt);
   //   loading = true;
   //   result = await fetchResult();
-  //   // TODO: what if prompt and next_id have changed?
   //   responses = [{ id: next_id, prompt, result}, ...responses];
   //   loading = false;
   //   prompt = "";
   //   next_id++;
   // };
 
-  const requestFileContents = () => {
+  const getFileContents = () => {
     return new Promise((resolve) => {
       const handler = (event) => {
         const message = event.data;
@@ -107,6 +106,40 @@
       window.addEventListener("message", handler);
       tsvscode.postMessage({ type: "get-file-contents" });
     });
+  };
+
+  const getSelectedCode = () => {
+    return new Promise((resolve) => {
+      const handler = (event) => {
+        const message = event.data;
+        if (message.type === "selection-change") {
+          window.removeEventListener("message", handler);
+          resolve(add_line_numbers(message.value, message.start_line));
+        }
+      };
+
+      window.addEventListener("message", handler);
+      tsvscode.postMessage({ type: "get-selection" });
+    });
+  };
+
+  // const replaceInFile = (code) => {
+  //   return new Promise((resolve) => {
+  //     const handler = (event) => {
+  //       const message = event.data;
+  //       if (message.type === "file-replace") {
+  //         window.removeEventListener("message", handler);
+  //         resolve(message.value);
+  //       }
+  //     };
+
+  //     window.addEventListener("message", handler);
+  //     tsvscode.postMessage({ type: "replace-in-file", value: code });
+  //   });
+  // };
+
+  const setSelectedCode = async () => {
+    selected_code = await getSelectedCode();
   };
 
   const updateStream = delta => {
@@ -124,63 +157,100 @@
 
   const streamResponse = async () => {
     // console.log("streaming response");
+    if (prompt === "") return;
+
     let context = "";
     if (scope === "File Context") {
-      context = await requestFileContents();
+      context = await getFileContents();
       context = add_line_numbers(context, 1);
       // console.log(context)
     } else if (scope === "Selection Context") {
       context = selected_code;
     }
 
-    if (prompt !== "") {
-      // loading=true;
-      result="";
-      responses = [{ id: next_id, prompt, result}, ...responses];
-      messages = [...messages,
-        { id: next_id, role: "user", content: `${prompt}\n\n${context}` }];
-      // console.log(messages);
-      let url = "https://api.openai.com/v1/chat/completions";
-      let data = {
-        model: model,
-        messages: messages.map(message => {
-          return { role: message.role, content: message.content };
-        }),
-        stream: true,
-      };
-      // console.log(data.messages);
+    streaming = true;
+    result="";
+    responses = [{ id: next_id, error: false, prompt, result}, ...responses];
+    messages = [...messages,
+      { id: next_id, role: "user", content: `${prompt}\n\n${context}` }];
+    // console.log(messages);
+    let url = "https://api.openai.com/v1/chat/completions";
+    let data = {
+      model: model,
+      messages: messages.map(message => {
+        return { role: message.role, content: message.content };
+      }),
+      stream: true,
+    };
+    // console.log(data.messages);
 
-      let source = new SSE(url, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
-        },
-        method: "POST",
-        payload: JSON.stringify(data),
-      });
+    let source = new SSE(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      method: "POST",
+      payload: JSON.stringify(data),
+    });
 
-      source.addEventListener("message", (e) => {
-        if (e.data != "[DONE]") {
-          let payload = JSON.parse(e.data);
-          let text = payload.choices[0].delta.content;
-          updateStream(text);
-        } else {
-          source.close();
-          prompt = "";
-          messages = [...messages,
-          { id: next_id, role: "assistant", content: result }];
-          next_id++;
-          // console.log(messages);
+    source.onerror = (error) => {
+      // console.error("Error in the SSE connection:", error.data);
+      error = JSON.parse(error.data);
+      // console.error(error.error.code);
+      let error_detail;
+      if (error.error.code === 'context_length_exceeded') {
+        error_detail = "Your context is too large. Please select a smaller portion of the file.";
+        // TODO: fix the code
+      } else if (error.error.code === 429) {
+        error_detail = "You have reached the API limit. Please try again later.";
+      } else if (error.error.code === 'invalid_api_key') {
+        error_detail = "Your API key is invalid. Please update it in settings.";
+      } else {
+        error_detail = "An error occurred. Please try again.";
+      }
+      responses = responses.map(response => {
+        if (response.id === next_id) {
+          return { ...response, error: true, result: error_detail };
         }
+        return response;
       });
-      source.stream();
-    }
+      streaming = false;
+      prompt = "";
+      next_id++;
+    };
+
+    source.addEventListener("message", (e) => {
+      if (e.data != "[DONE]") {
+        let payload = JSON.parse(e.data);
+        let text = payload.choices[0].delta.content;
+        updateStream(text);
+      } else {
+        source.close();
+        sse_connection = null;
+        streaming = false;
+        prompt = "";
+        messages = [...messages,
+        { id: next_id, role: "assistant", content: result }];
+        next_id++;
+        // console.log(messages);
+      }
+    });
+
+    source.stream();
+    sse_connection = {id: next_id, source};
   }
 
   const handleRemove = (id) => {
     responses = responses.filter(response => response.id !== id);
     messages = messages.filter(message => message.id !== id);
     // console.log(messages);
+    if (sse_connection.id === id) {
+      sse_connection.source.close();
+      sse_connection = null;
+      streaming = false;
+      prompt = "";
+      next_id++;
+    }
   }
 
   const replaceInFile = (code) => {
@@ -197,18 +267,25 @@
 
 <body>
   <!-- TODO: fix input and prompt overflow -->
-  <Input handleSubmit={streamResponse}
+  <Input 
+    handleSubmit={streamResponse}
     bind:prompt
     bind:scope
     bind:selected_code
+    streaming={streaming}
   />
   {#if responses.length === 0}
-    <Examples imageUri={imageUri}/>
+    <Examples/>
   {/if}
-  <!-- TODO: sort by descending order -->
   {#each responses as res (res.id)}
-    <!-- TODO: spacing in between cards is not even -->
-    <Response id={res.id} prompt={res.prompt} result={res.result} onRemove={handleRemove} onCopy={copyCode} onReplace={replaceInFile}/>
+    <Response id={res.id}
+      prompt={res.prompt} 
+      result={res.result}
+      error={res.error}
+      onRemove={handleRemove}
+      onCopy={copyCode}
+      onReplace={replaceInFile}
+    />
   {/each} 
 </body>
 

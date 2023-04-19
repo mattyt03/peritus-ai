@@ -31,6 +31,7 @@
 <style>
     .response-text {
         white-space: pre-wrap;
+        word-wrap: break-word;
         font-family: "Montserrat", sans-serif;
     }
 </style>

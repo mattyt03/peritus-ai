@@ -3,12 +3,14 @@
     import Fa from 'svelte-fa';
     import { faFile, faCode, faXmark, faChevronDown } from '@fortawesome/pro-regular-svg-icons'
     import ScopeSelector from "./ScopeSelector.svelte";
+    import { tick } from "svelte";
 
     let scopeSelector = false;
     export let prompt;
     export let scope;
     export let selected_code;
     export let handleSubmit;
+    export let streaming;
 
     // TODO: how to restrict values of context?
     const setScope = (new_scope) => {
@@ -18,13 +20,54 @@
         selected_code = "";
       }
     }
+
+    // function to reset textarea when prompt gets cleared after a response
+    // TODO: redundant
+    const resetTextareaSize = async () => {
+      await tick();
+      const textarea = document.querySelector(".prompt");
+      if (textarea) {
+          // console.log('resetting');
+          textarea.style.height = "auto";
+          textarea.style.height = textarea.scrollHeight + "px";
+      }
+    };
+
+    $: {
+      if (prompt === "") {
+        resetTextareaSize();
+      }
+    }
+
+    const autoResize = (event) => {
+      const textarea = event.target;
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+
+      if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey) {
+        event.preventDefault();
+        handleSubmit();
+      }
+    }
+
 </script>
 
 
 <div class="container" class:less-margin="{scopeSelector}">
   <div class="border-radius">
+    <!-- TODO: do I need both the on:input and on:keydown? -->
     <form on:submit|preventDefault={handleSubmit}>
-      <input class="prompt" type="text" bind:value={prompt} placeholder="How may I assist you?"/>
+      <textarea 
+        class="prompt" 
+        type="text"
+        rows="1"
+        bind:value={prompt} 
+        placeholder="How may I assist you?" 
+        disabled={streaming} 
+        on:input={autoResize}
+        on:keydown={autoResize}
+      />
+      <!-- <input class="prompt" type="text" bind:value={prompt} placeholder="How may I assist you?" disabled={streaming}/> -->
     </form>
     <!-- refactor this into a separate component -->
     <button class="scope" on:click={() => {scopeSelector = !scopeSelector}}>
@@ -63,9 +106,9 @@
       /* background-color: var(--vscode-editor-background); */
       background-color: #302544;
       resize: none;
-      height: auto;
+      overflow: hidden;
       padding: 1.15rem;
-      white-space: initial;
+      white-space: pre-wrap;
       font-family: "Montserrat", sans-serif;
       margin: 0;
   }

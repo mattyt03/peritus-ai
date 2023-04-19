@@ -1,11 +1,13 @@
 <script>
     import Code from "./Code.svelte";
     import Text from "./Text.svelte";
+    import Error from "./Error.svelte";
     import Fa from 'svelte-fa';
     import { faXmark } from '@fortawesome/pro-regular-svg-icons'
 
     export let prompt;
     export let result;
+    export let error;
     export let id;
     export let onRemove;
     export let onReplace;
@@ -31,18 +33,20 @@
   <button on:click={() => onRemove(id)} class="close-btn">
     <Fa icon={faXmark} size='1.25x' color="lightgrey"/>
   </button>
-  <!-- {#if showClose}
-  {/if} -->
   <div class="prompt">{prompt}</div>
-  <div class="response">
-      {#each segments as segment, i}
-          {#if i % 2 === mod}
-            <Code code={segment} asResponse={true} onCopy={onCopy} onReplace={onReplace}/>
-          {:else}
-            <Text text={segment} />
-          {/if}
-      {/each}
-  </div>
+  {#if error}
+    <Error content={result}/>
+  {:else}
+    <div class="response">
+        {#each segments as segment, i}
+            {#if i % 2 === mod}
+              <Code code={segment} asResponse={true} onCopy={onCopy} onReplace={onReplace}/>
+            {:else}
+              <Text text={segment} />
+            {/if}
+        {/each}
+    </div>
+  {/if}
 </div>
   
   <style>
@@ -55,6 +59,7 @@
         height: auto;
         padding: 1rem;
         white-space: initial;
+        word-wrap: break-word;
         width: 100%;
         border-radius: 0.75rem;
         text-align: center;

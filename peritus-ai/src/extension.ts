@@ -77,8 +77,6 @@ export function activate(context: vscode.ExtensionContext) {
 		const {activeTextEditor} = vscode.window;
 		if (!activeTextEditor)
 			return;
-		// if (activeTextEditor.selection.isEmpty)
-		// 	return;
 		// vscode.window.showInformationMessage("Selection changed");
 		const selection = activeTextEditor.selection;
 		const selected_code = activeTextEditor.document.getText(selection);

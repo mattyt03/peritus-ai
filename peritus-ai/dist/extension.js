@@ -16,7 +16,7 @@ const getNonce_1 = __webpack_require__(/*! ./getNonce */ "./src/getNonce.ts");
 class SidebarProvider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;
-        // TODO: move this to extension.ts?
+        // TODO: do we need this?
         vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (editor) {
                 this._doc = editor.document;
@@ -39,20 +39,52 @@ class SidebarProvider {
             switch (data.type) {
                 case "replace-in-file": {
                     const editor = vscode.window.activeTextEditor;
-                    if (editor && data.value) {
+                    let success = false;
+                    if (editor) {
                         const document = editor.document;
                         const selectedText = editor.selection;
                         const workspaceEdit = new vscode.WorkspaceEdit();
                         workspaceEdit.replace(document.uri, selectedText, data.value);
                         await vscode.workspace.applyEdit(workspaceEdit);
+                        success = true;
                     }
+                    else {
+                        vscode.window.showErrorMessage("No file open");
+                    }
+                    // this._view?.webview.postMessage({
+                    //   type: "file-replace",
+                    //   value: success,
+                    // });
                     break;
                 }
                 case "get-file-contents": {
+                    const editor = vscode.window.activeTextEditor;
+                    let file_contents = "";
+                    if (editor) {
+                        file_contents = editor.document.getText();
+                    }
                     this._view?.webview.postMessage({
                         type: "file-contents",
-                        value: this._doc?.getText(),
+                        value: file_contents,
                     });
+                    break;
+                }
+                case "get-selection": {
+                    const editor = vscode.window.activeTextEditor;
+                    let selected_code = "";
+                    let start_line = 0;
+                    if (editor) {
+                        const selection = editor.selection;
+                        selected_code = editor.document.getText(selection);
+                        // line numbers are 0-based, add 1 for display
+                        start_line = selection.start.line + 1;
+                    }
+                    this._view?.webview.postMessage({
+                        type: "selection-change",
+                        value: selected_code,
+                        start_line: start_line,
+                    });
+                    break;
                 }
                 case "onInfo": {
                     if (!data.value) {
@@ -245,8 +277,6 @@ function activate(context) {
         const { activeTextEditor } = vscode.window;
         if (!activeTextEditor)
             return;
-        // if (activeTextEditor.selection.isEmpty)
-        // 	return;
         // vscode.window.showInformationMessage("Selection changed");
         const selection = activeTextEditor.selection;
         const selected_code = activeTextEditor.document.getText(selection);

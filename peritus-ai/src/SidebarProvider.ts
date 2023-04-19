@@ -6,7 +6,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   _doc?: vscode.TextDocument;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
-    // TODO: move this to extension.ts?
+    // TODO: do we need this?
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
         this._doc = editor.document;
@@ -35,7 +35,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       switch (data.type) {
         case "replace-in-file": {
           const editor = vscode.window.activeTextEditor;
-          if (editor && data.value) {
+          let success = false;
+          if (editor) {
             const document = editor.document;
             const selectedText = editor.selection;
 
@@ -43,14 +44,44 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             workspaceEdit.replace(document.uri, selectedText, data.value);
 
             await vscode.workspace.applyEdit(workspaceEdit);
+            success = true;
+          } else {
+            vscode.window.showErrorMessage("No file open");
           }
+          // this._view?.webview.postMessage({
+          //   type: "file-replace",
+          //   value: success,
+          // });
           break;
         }
         case "get-file-contents": {
+          const editor = vscode.window.activeTextEditor;
+          let file_contents = "";
+          if (editor) {
+            file_contents = editor.document.getText();
+          }
           this._view?.webview.postMessage({
             type: "file-contents",
-            value: this._doc?.getText(),
+            value: file_contents,
           });
+          break;
+        }
+        case "get-selection": {
+          const editor = vscode.window.activeTextEditor;
+          let selected_code = "";
+          let start_line = 0;
+          if (editor) {
+            const selection = editor.selection;
+            selected_code = editor.document.getText(selection);
+            // line numbers are 0-based, add 1 for display
+            start_line = selection.start.line + 1;
+          }
+          this._view?.webview.postMessage({
+            type: "selection-change",
+            value: selected_code,
+            start_line: start_line,
+          });
+          break;
         }
         case "onInfo": {
           if (!data.value) {
