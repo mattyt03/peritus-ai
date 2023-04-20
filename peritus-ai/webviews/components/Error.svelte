@@ -9,10 +9,20 @@
     <div class="icon-container">
         <Fa icon={faTriangleExclamation} size='2x' color="lightgrey"/>
     </div>
-    <div class="content">{content}</div>
+    <div>{content}</div>
 </div>
 
 <style>
+    *,
+    *::after,
+    *::before {
+        box-sizing: border-box;
+        color: lightgrey;
+        font-family: "Montserrat", sans-serif;
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
     .container {
         display: flex;
         justify-content: center;
@@ -21,8 +31,5 @@
     .icon-container {
         margin: 1rem;
         margin-left: 0;
-    }
-    .content {
-        font-family: "Montserrat", sans-serif;
     }
 </style>

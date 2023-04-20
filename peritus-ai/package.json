@@ -17,7 +17,7 @@
         {
           "id": "peritus-ai-sidebar-view",
           "title": "Peritus AI",
-          "icon": "media/hubot.svg"
+          "icon": "media/logo2.svg"
         }
       ]
     },
@@ -27,7 +27,7 @@
           "type": "webview",
           "id": "peritus-ai-sidebar",
           "name": "Peritus AI",
-          "icon": "media/hubot.svg",
+          "icon": "media/logo2.svg",
           "contextualTitle": "Peritus AI"
         }
       ]

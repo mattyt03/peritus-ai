@@ -2,6 +2,7 @@
     import Fa from 'svelte-fa';
     import { faLightbulb } from '@fortawesome/pro-regular-svg-icons'
     import logo from '../../media/logo.svg';
+    import logo2 from '../../media/logo2.svg';
 
     let examples = ['"Implement dijkstra\'s shortest path algorithm in c++"',
                     '"Why is the div on line 24 not being centered properly?"',
@@ -15,7 +16,7 @@
     <div class="examples-container">
         <div class="title-container">
             <div class="title-icon">
-                <Fa icon={faLightbulb} size='1.5x'/>
+                <Fa icon={faLightbulb} size='1.5x' color="lightgrey"/>
             </div>
             <h1 class="title">Examples</h1>
         </div>
@@ -28,13 +29,20 @@
         </div>
     </div>
     <div class="logo-container">
-        {@html logo}
+        {@html logo2}
     </div>
 </div>
 
 <style>
-    div {
+    *,
+    *::after,
+    *::before {
+        box-sizing: border-box;
+        color: lightgrey;
+        font-family: "Montserrat", sans-serif;
+        padding: 0;
         margin: 0;
+        border: none;
     }
     .container {
         flex-grow: 1;
@@ -63,7 +71,8 @@
         margin-bottom: 1rem;
     }
     .title {
-        font-family: "Montserrat", sans-serif;
+        /* font-family: "Montserrat", sans-serif; */
+        /* color: lightgrey; */
         text-align: center;
         font-size: 1.5rem;
         font-weight: 500;
@@ -77,7 +86,8 @@
         overflow: hidden;
         margin-bottom: 1rem;
         padding: 1.15rem;
-        font-family: "Montserrat", sans-serif;
+        /* font-family: "Montserrat", sans-serif; */
+        /* color: lightgrey; */
         text-align: center;
     }
     .logo-container {

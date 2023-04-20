@@ -3839,11 +3839,11 @@ var app = (function () {
     			t = space();
     			button1 = element("button");
     			create_component(fa1.$$.fragment);
-    			attr_dev(button0, "class", "btn svelte-182cie6");
+    			attr_dev(button0, "class", "btn svelte-1236kzm");
     			add_location(button0, file$1, 70, 6, 1929);
-    			attr_dev(button1, "class", "btn svelte-182cie6");
+    			attr_dev(button1, "class", "btn svelte-1236kzm");
     			add_location(button1, file$1, 73, 6, 2054);
-    			attr_dev(div, "class", "btn-container svelte-182cie6");
+    			attr_dev(div, "class", "btn-container svelte-1236kzm");
     			add_location(div, file$1, 69, 4, 1895);
     		},
     		m: function mount(target, anchor) {
@@ -3929,14 +3929,14 @@ var app = (function () {
     			div1 = element("div");
     			div0 = element("div");
     			code_1 = element("code");
-    			attr_dev(code_1, "class", "svelte-182cie6");
+    			attr_dev(code_1, "class", "svelte-1236kzm");
     			add_location(code_1, file$1, 80, 6, 2308);
-    			attr_dev(div0, "class", "inner-container svelte-182cie6");
+    			attr_dev(div0, "class", "inner-container svelte-1236kzm");
     			add_location(div0, file$1, 79, 4, 2272);
-    			attr_dev(div1, "class", "svelte-182cie6");
+    			attr_dev(div1, "class", "svelte-1236kzm");
     			toggle_class(div1, "border-radius", /*asResponse*/ ctx[1]);
     			add_location(div1, file$1, 78, 2, 2227);
-    			attr_dev(div2, "class", "outer-container svelte-182cie6");
+    			attr_dev(div2, "class", "outer-container svelte-1236kzm");
     			add_location(div2, file$1, 67, 0, 1773);
     		},
     		l: function claim(nodes) {

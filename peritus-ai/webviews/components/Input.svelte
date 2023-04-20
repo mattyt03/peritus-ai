@@ -1,7 +1,7 @@
 <script>
     import Code from "./Code.svelte";
     import Fa from 'svelte-fa';
-    import { faFile, faCode, faXmark, faChevronDown } from '@fortawesome/pro-regular-svg-icons'
+    import { faFile, faCode, faXmark, faChevronDown, faPaperPlaneTop } from '@fortawesome/pro-regular-svg-icons'
     import ScopeSelector from "./ScopeSelector.svelte";
     import { tick } from "svelte";
 
@@ -56,7 +56,7 @@
 <div class="container" class:less-margin="{scopeSelector}">
   <div class="border-radius">
     <!-- TODO: do I need both the on:input and on:keydown? -->
-    <form on:submit|preventDefault={handleSubmit}>
+    <form class="form" on:submit|preventDefault={handleSubmit}>
       <textarea 
         class="prompt" 
         type="text"
@@ -67,6 +67,9 @@
         on:input={autoResize}
         on:keydown={autoResize}
       />
+      <button class="send" type="submit" disabled={streaming}>
+        <Fa icon={faPaperPlaneTop} size='1.2x' color="lightgrey"/>
+      </button>
       <!-- <input class="prompt" type="text" bind:value={prompt} placeholder="How may I assist you?" disabled={streaming}/> -->
     </form>
     <!-- refactor this into a separate component -->
@@ -97,20 +100,38 @@
 
 <style>
   /* base styles */
+  /* TODO: get rid of vscode styles */
   *,
   *::after,
   *::before {
     box-sizing: border-box;
+    color: lightgrey;
+    font-family: "Montserrat", sans-serif;
+    padding: 0;
+    margin: 0;
+    border: none;
   }
   .prompt {
-      /* background-color: var(--vscode-editor-background); */
-      background-color: #302544;
-      resize: none;
-      overflow: hidden;
-      padding: 1.15rem;
-      white-space: pre-wrap;
-      font-family: "Montserrat", sans-serif;
-      margin: 0;
+    flex-grow: 1;
+    background-color: #302544;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+  }
+  .send {
+    background-color: #302544;
+    margin-left: 1.15rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+  }
+  .form {
+    background-color: #302544;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 1.15rem;
   }
   *:focus {
     outline: none;
@@ -119,11 +140,12 @@
     display: flex;
     flex-direction: column;
     /* background-color: var(--vscode-input-background); */
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    /* there's already some margin on top */
+    margin-top: 1.25rem;
+    margin-bottom: 1.5rem;
   }
   .less-margin {
-    margin-bottom: 0.1rem;
+    margin-bottom: 0.4rem;
   }
   .border-radius {
     border-radius: 1rem;
@@ -131,25 +153,21 @@
     overflow: hidden;
   }
   .scope {
-      display: flex;
-      /* padding: 0.5rem; */
-      background-color: #483D67;
-      justify-content: center;
-      align-items: center;
-      padding: 0;
+    display: flex;
+    background-color: #483D67;
+    justify-content: center;
+    align-items: center;
   }
   .scope-icon {
-      padding: 0.5rem;
-      display: flex;
-      flex-direction: center;
-      justify-content: center;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: center;
+    justify-content: center;
   }
   p {
-      text-align: center;
-      color: lightgrey;
-      font-family: "Montserrat", sans-serif;
-      text-transform: uppercase;
-      font-weight: 600;
-      font-size: 0.8rem;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 0.8rem;
   }
 </style>

@@ -40,6 +40,11 @@
     *::after,
     *::before {
         box-sizing: border-box;
+        /* color: lightgrey; */
+        font-family: "Montserrat", sans-serif;
+        padding: 0;
+        margin: 0;
+        border: none;
     }
     .container {
         display: flex;
@@ -48,7 +53,7 @@
         border-radius: 1rem;
         background-color: #302544;
         padding: 0.5rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
     .scope {
         display: flex;
@@ -64,7 +69,7 @@
         justify-content: center;
         align-items: flex-start;
         padding: 0.5rem;
-        font-family: "Montserrat", sans-serif;
+        /* font-family: "Montserrat", sans-serif; */
     }
     .scope-icon {
         box-sizing: content-box;

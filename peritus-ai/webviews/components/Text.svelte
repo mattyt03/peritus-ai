@@ -29,9 +29,18 @@
 
 
 <style>
+    *,
+    *::after,
+    *::before {
+        box-sizing: border-box;
+        color: lightgrey;
+        font-family: "Montserrat", sans-serif;
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
     .response-text {
         white-space: pre-wrap;
         word-wrap: break-word;
-        font-family: "Montserrat", sans-serif;
     }
 </style>

@@ -50,6 +50,16 @@
 </div>
   
   <style>
+    *,
+    *::after,
+    *::before {
+        box-sizing: border-box;
+        color: lightgrey;
+        font-family: "Montserrat", sans-serif;
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
     /* how do you share styles between svelte components? */
     .prompt {
         /* background-color: #302544; */
@@ -64,7 +74,7 @@
         border-radius: 0.75rem;
         text-align: center;
         margin-bottom: 1rem;
-        font-family: "Montserrat", sans-serif;
+        /* font-family: "Montserrat", sans-serif; */
     }
     .response {
         /* padding: 0.5rem; */
@@ -82,7 +92,7 @@
       background-color: #302544;
       /* background-color: var(--vscode-input-background); */
       /* border-color: var(--vscode-input-background); */
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
     .close-btn {
         position: absolute;
