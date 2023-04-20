@@ -200,6 +200,11 @@ function activate(context) {
         vscode.window.showInformationMessage('Hello from Peritus AI!');
         // HelloWorldPanel.createOrShow(context.extensionUri);
     }));
+    context.subscriptions.push(vscode.window.onError(() => { 
+		vscode.commands.registerCommand('peritus-ai.error', async () => {
+			vscode.commands.showErrorMessage("Error Found! Debug with Peritus?", "Yes", "No");
+		})
+	}));
     // context.subscriptions.push(
     // 	vscode.commands.registerCommand('peritus-ai.askQuestion', async () => {
     // 		const answer = await vscode.window.showInformationMessage("How was your day?", "good", "bad");
