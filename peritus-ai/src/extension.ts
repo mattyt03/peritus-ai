@@ -56,11 +56,22 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 	
-	context.subscriptions.push(vscode.window.onError(() => { 
+	context.subscriptions.push( 
 		vscode.commands.registerCommand('peritus-ai.error', async () => {
-			vscode.commands.showErrorMessage("Error Found! Debug with Peritus?", "Yes", "No");
+			const answer = await vscode.window.showInformationMessage("Error Found! Debug with Peritus?", "Yes", "No");
+			if (answer === "Yes"){
+				//Prompt Peritus with formalized debug prompt
+				vscode.window.showInformationMessage("Please input the following prompt: Debug the following file which recieved an ${error} Error upon running")
+			}//else we let user handle debug as needed
 		})
-	}));
+	);
+	context.subscriptions.push(
+		vscode.window.onDidCloseTerminal((terminal) => {
+			if(terminal.exitStatus && terminal.exitStatus.code !== 0){
+				vscode.commands.executeCommand("peritus-ai.error");
+			}
+		})
+	);
 	// context.subscriptions.push(
 	// 	vscode.commands.registerCommand('peritus-ai.addTodo', async () => {
 	// 		const {activeTextEditor} = vscode.window;

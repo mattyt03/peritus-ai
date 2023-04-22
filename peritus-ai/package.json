@@ -52,6 +52,11 @@
         "command": "peritus-ai.addTodo",
         "category": "Peritus AI",
         "title": "Add Todo From Selection"
+      },
+      {
+        "command": "peritus-ai.error",
+        "category": "Peritus AI",
+        "title": "Prompt User for Debug"
       }
     ]
   },
