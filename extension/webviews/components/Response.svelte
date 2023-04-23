@@ -30,7 +30,7 @@
   
 <!-- on:mouseenter={toggleShow} on:mouseleave={toggleShow} -->
 <div class="container">
-  <button on:click={() => onRemove(id)} class="close-btn">
+  <button on:click={onRemove(id)} class="close-btn">
     <Fa icon={faXmark} size='1.25x' color="lightgrey"/>
   </button>
   <div class="prompt">{prompt}</div>
