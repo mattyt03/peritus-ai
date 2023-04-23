@@ -52,6 +52,10 @@
         "command": "peritus-ai.addTodo",
         "category": "Peritus AI",
         "title": "Add Todo From Selection"
+      },
+      {
+        "command": "peritus-ai.runCode",
+        "title": "Run Code"
       }
     ]
   },

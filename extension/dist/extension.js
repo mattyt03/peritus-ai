@@ -86,6 +86,10 @@ class SidebarProvider {
                     });
                     break;
                 }
+                case "run-code": {
+                    vscode.commands.executeCommand("peritus-ai.runCode");
+                    break;
+                }
                 case "onInfo": {
                     if (!data.value) {
                         return;
@@ -232,10 +236,10 @@ function activate(context) {
     // Now provide the implementation of the command with registerCommand
     // The commandId parameter must match the command field in package.json
     // context.subscriptions.push disposes of the listener when we're done
-    context.subscriptions.push(vscode.commands.registerCommand('peritus-ai.helloWorld', () => {
+    context.subscriptions.push(vscode.commands.registerCommand("peritus-ai.helloWorld", () => {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
-        vscode.window.showInformationMessage('Hello from Peritus AI!');
+        vscode.window.showInformationMessage("Hello from Peritus AI!");
         // HelloWorldPanel.createOrShow(context.extensionUri);
     }));
     // context.subscriptions.push(
@@ -248,7 +252,7 @@ function activate(context) {
     // 		}
     // 	})
     // );
-    context.subscriptions.push(vscode.commands.registerCommand('peritus-ai.refresh', async () => {
+    context.subscriptions.push(vscode.commands.registerCommand("peritus-ai.refresh", async () => {
         // HelloWorldPanel.kill();
         // HelloWorldPanel.createOrShow(context.extensionUri);
         await vscode.commands.executeCommand("workbench.action.closeSidebar");
@@ -283,7 +287,7 @@ function activate(context) {
         // line numbers are 0-based, add 1 for display
         const start_line = selection.start.line + 1;
         sidebarProvider._view?.webview.postMessage({
-            type: 'selection-change',
+            type: "selection-change",
             value: selected_code,
             start_line: start_line,
         });
@@ -299,6 +303,32 @@ function activate(context) {
     // 		});
     // 	}
     // }));
+    context.subscriptions.push(vscode.commands.registerCommand("peritus-ai.runCode", async () => {
+        //   console.log("Task started");
+        //   const runCode = vscode.workspace.workspaceFolders
+        // 	? vscode.workspace.workspaceFolders[0].uri.fsPath
+        // 	: "";
+        const activeEditor = vscode.window.activeTextEditor;
+        //   TODO: make consistent
+        if (!activeEditor) {
+            vscode.window.showWarningMessage("No active text editor found. Please open a file to run.");
+            return;
+        }
+        const activeFile = activeEditor.document.fileName;
+        const task = new vscode.Task({ type: "peritus-ai" }, vscode.TaskScope.Workspace, "Run Code", "Peritus AI", new vscode.ShellExecution(`python3 "${activeFile}"`));
+        task.group = vscode.TaskGroup.Build;
+        task.problemMatchers = ["$eslint-stylish"];
+        await vscode.tasks.executeTask(task);
+    }));
+    vscode.tasks.onDidEndTaskProcess(async (event) => {
+        if (event.execution.task.name === "Run Code") {
+            const error = event.exitCode !== 0;
+            sidebarProvider._view?.webview.postMessage({
+                type: "code-run",
+                value: error,
+            });
+        }
+    });
 }
 exports.activate = activate;
 // This method is called when your extension is deactivated

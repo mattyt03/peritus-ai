@@ -83,6 +83,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           });
           break;
         }
+        case "run-code": {
+          vscode.commands.executeCommand("peritus-ai.runCode");
+          break;
+        }
         case "onInfo": {
           if (!data.value) {
             return;

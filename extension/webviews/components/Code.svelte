@@ -3,6 +3,18 @@
   import Fa from 'svelte-fa';
   import { faCopy, faFileImport} from '@fortawesome/pro-regular-svg-icons'
   import confetti from "canvas-confetti";
+  // TODO: is there a way to import all of these at once?
+  import "prismjs/components/prism-python";
+  import "prismjs/components/prism-javascript";
+  import "prismjs/components/prism-typescript";
+  import "prismjs/components/prism-java";
+  import "prismjs/components/prism-html";
+  import "prismjs/components/prism-css";
+  import "prismjs/components/prism-c";
+  import "prismjs/components/prism-cpp";
+  import "prismjs/components/prism-bash";
+  import "prismjs/components/prism-jsx";
+  import "prismjs/components/prism-go";
 
   export let code = "";
   export let asResponse;
@@ -10,7 +22,6 @@
   export let onCopy;
 
   let showButtons = false;
-  let btn;
 
   const toggleShow = () => {
     showButtons = !showButtons;
@@ -44,16 +55,39 @@
     };
   }
 
-  // TODO: change language
   let language = "javascript";
-  // c causes some problems
-  // JavaScript also won't get recognized
-  let languages = ["python", "Python", "javascript", "JavaScript", "java", "Java", "html", "css", "c++", "C++", "cpp", "bash", "Bash", "jsx", "golang", "Golang", "go", "Go", "js"]
+  // TODO: c causes some problems
+  // TODO: remove redundant languages
+  const language_mappings = {
+    "python": "python",
+    "Python": "python",
+    "javascript": "javascript",
+    "JavaScript": "javascript",
+    "typescript": "typescript",
+    "TypeScript": "typescript",
+    "ts": "typescript",
+    "java": "java",
+    "Java": "java",
+    "html": "html",
+    "css": "css",
+    "c++": "cpp",
+    "C++": "cpp",
+    "cpp": "cpp",
+    "bash": "bash",
+    "Bash": "bash",
+    "jsx": "jsx",
+    "js": "javascript",
+    "golang": "go",
+    "Golang": "go",
+    "go": "go",
+    "Go": "go",
+  }
 
   $ : {
-    for (let lang of languages) {
+    for (let lang in language_mappings) {
       if (code.startsWith(lang) || code.startsWith(lang.toUpperCase())) {
         code = code.slice(lang.length);
+        language = language_mappings[lang];
         break;
       }
     }
@@ -71,7 +105,7 @@
       <button on:click={onCopy(code)} class="btn">
         <Fa icon={faCopy} size='1.5x' color="lightgrey"/>
       </button>
-      <button on:click={(e) => handleReplace(e)} class="btn" bind:this={btn}>
+      <button on:click={(e) => handleReplace(e)} class="btn">
         <Fa icon={faFileImport} size='1.5x' color="lightgrey"/>
       </button>
     </div>
