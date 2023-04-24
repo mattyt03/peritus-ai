@@ -1,7 +1,6 @@
 <script>
     import Fa from 'svelte-fa';
-    import { faLightbulb } from '@fortawesome/pro-regular-svg-icons'
-    import logo from '../../media/logo.svg';
+    import { faLightbulb } from '@fortawesome/pro-regular-svg-icons';
     import logo2 from '../../media/logo2.svg';
 
     let examples = ['"Implement dijkstra\'s shortest path algorithm in c++"',

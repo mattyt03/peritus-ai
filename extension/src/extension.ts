@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
   const sidebarProvider = new SidebarProvider(context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      "peritus-ai-sidebar",
+      "peritus-sidebar",
       sidebarProvider
     )
   );
@@ -22,28 +22,17 @@ export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
 
   // context.subscriptions.push disposes of the listener when we're done
-  context.subscriptions.push(
-    vscode.commands.registerCommand("peritus-ai.helloWorld", () => {
-      // The code you place here will be executed every time your command is executed
-      // Display a message box to the user
-      vscode.window.showInformationMessage("Hello from Peritus AI!");
-      // HelloWorldPanel.createOrShow(context.extensionUri);
-    })
-  );
-
   // context.subscriptions.push(
-  // 	vscode.commands.registerCommand('peritus-ai.askQuestion', async () => {
-  // 		const answer = await vscode.window.showInformationMessage("How was your day?", "good", "bad");
-  // 		if (answer === "bad") {
-  // 			vscode.window.showInformationMessage("Sorry to hear that");
-  // 		} else {
-  // 			console.log(answer);
-  // 		}
-  // 	})
+  //   vscode.commands.registerCommand("peritus.helloWorld", () => {
+  //     // The code you place here will be executed every time your command is executed
+  //     // Display a message box to the user
+  //     vscode.window.showInformationMessage("Hello from Peritus AI!");
+  //     // HelloWorldPanel.createOrShow(context.extensionUri);
+  //   })
   // );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("peritus-ai.refresh", async () => {
+    vscode.commands.registerCommand("peritus.refresh", async () => {
       // HelloWorldPanel.kill();
       // HelloWorldPanel.createOrShow(context.extensionUri);
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
@@ -55,23 +44,6 @@ export function activate(context: vscode.ExtensionContext) {
       // }, 500);
     })
   );
-
-  // context.subscriptions.push(
-  // 	vscode.commands.registerCommand('peritus-ai.addTodo', async () => {
-  // 		const {activeTextEditor} = vscode.window;
-  // 		if (!activeTextEditor) {
-  // 			vscode.window.showInformationMessage("No active text editor");
-  // 			return;
-  // 		}
-  // 		// add check if text is empty
-  // 		const text = activeTextEditor.document.getText(activeTextEditor.selection);
-  // 		// vscode.window.showInformationMessage("Text: " + text);
-  // 		sidebarProvider._view?.webview.postMessage({
-  // 			type: 'new-todo',
-  // 			value: text,
-  // 		});
-  // 	})
-  // );
 
   context.subscriptions.push(
     vscode.window.onDidChangeTextEditorSelection(() => {
@@ -91,27 +63,15 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
-  // 	vscode.window.showInformationMessage("File changed");
-  // 	if (vscode.window.activeTextEditor && event.document.uri === vscode.window.activeTextEditor.document.uri) {
-  // 		const text = event.document.getText();
-  // 		console.log(text);
-  // 		sidebarProvider._view?.webview.postMessage({
-  // 			type: 'file-change',
-  // 			value: text,
-  // 		});
-  // 	}
-  // }));
-
   context.subscriptions.push(
-    vscode.commands.registerCommand("peritus-ai.runCode", async () => {
+    vscode.commands.registerCommand("peritus.runCode", async () => {
       //   console.log("Task started");
       //   const runCode = vscode.workspace.workspaceFolders
       // 	? vscode.workspace.workspaceFolders[0].uri.fsPath
       // 	: "";
       const activeEditor = vscode.window.activeTextEditor;
 
-	//   TODO: make consistent
+	    //   TODO: make consistent
       if (!activeEditor) {
         vscode.window.showWarningMessage(
           "No active text editor found. Please open a file to run."
@@ -122,10 +82,10 @@ export function activate(context: vscode.ExtensionContext) {
       const activeFile = activeEditor.document.fileName;
 
       const task = new vscode.Task(
-        { type: "peritus-ai" },
+        { type: "peritus" },
         vscode.TaskScope.Workspace,
         "Run Code",
-        "Peritus AI",
+        "Peritus",
         new vscode.ShellExecution(`python3 "${activeFile}"`)
       );
 

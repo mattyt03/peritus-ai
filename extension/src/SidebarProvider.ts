@@ -84,8 +84,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "run-code": {
-          vscode.commands.executeCommand("peritus-ai.runCode");
+          vscode.commands.executeCommand("peritus.runCode");
           break;
+        }
+        case "open-settings": {
+          vscode.commands.executeCommand("workbench.action.openSettings", "@ext:peritus.peritus");
+        }
+        case "get-settings": {
+          const settings = vscode.workspace.getConfiguration("peritus");
+          // console.log(settings);
+          this._view?.webview.postMessage({
+            type: "settings",
+            value: settings,
+          });
         }
         case "onInfo": {
           if (!data.value) {

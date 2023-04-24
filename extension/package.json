@@ -1,8 +1,9 @@
 {
-  "name": "peritus-ai",
-  "displayName": "Peritus AI",
-  "description": "An AI Code Assistant",
+  "name": "peritus",
+  "displayName": "Peritus",
   "version": "0.0.1",
+  "publisher": "Peritus",
+  "description": "Smarter Coding Made Easy",
   "engines": {
     "vscode": "^1.76.0"
   },
@@ -12,49 +13,56 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Peritus",
+      "properties": {
+        "peritus.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your OpenAI API key"
+        },
+        "peritus.model": {
+          "type": "string",
+          "default": "gpt-3.5-turbo",
+          "enum": ["gpt-3.5-turbo", "gpt-4"],
+          "description": "The language model used for requests"
+        },
+        "peritus.maxTokensPerRequest": {
+          "type": "number",
+          "default": 1000,
+          "description": "The maximum number of tokens per request"
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "peritus-ai-sidebar-view",
-          "title": "Peritus AI",
+          "id": "peritus-sidebar-view",
+          "title": "Peritus",
           "icon": "media/logo2.svg"
         }
       ]
     },
     "views": {
-      "peritus-ai-sidebar-view": [
+      "peritus-sidebar-view": [
         {
           "type": "webview",
-          "id": "peritus-ai-sidebar",
-          "name": "Peritus AI",
+          "id": "peritus-sidebar",
+          "name": "Peritus",
           "icon": "media/logo2.svg",
-          "contextualTitle": "Peritus AI"
+          "contextualTitle": "Peritus"
         }
       ]
     },
     "commands": [
       {
-        "command": "peritus-ai.helloWorld",
-        "category": "Peritus AI",
-        "title": "Hello World"
-      },
-      {
-        "command": "peritus-ai.askQuestion",
-        "category": "Peritus AI",
-        "title": "Ask Question"
-      },
-      {
-        "command": "peritus-ai.refresh",
-        "category": "Peritus AI",
+        "command": "peritus.refresh",
+        "category": "Peritus",
         "title": "Refresh"
       },
       {
-        "command": "peritus-ai.addTodo",
-        "category": "Peritus AI",
-        "title": "Add Todo From Selection"
-      },
-      {
-        "command": "peritus-ai.runCode",
+        "command": "peritus.runCode",
+        "category": "Peritus",
         "title": "Run Code"
       }
     ]
@@ -63,7 +71,7 @@
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
     "watch": "concurrently \"rollup -c -w --bundleConfigAsCjs\" \"webpack --mode development --watch\"",
-    "package": "webpack --mode production --devtool hidden-source-map",
+    "package": "rollup -c --bundleConfigAsCjs && webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
