@@ -1,12 +1,22 @@
 {
   "name": "peritus",
   "displayName": "Peritus",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "publisher": "Peritus",
   "description": "Smarter Coding Made Easy",
   "engines": {
     "vscode": "^1.76.0"
   },
+  "bugs": {
+    "url": "https://github.com/mattyt03/peritus-ai/issues",
+    "email": "matthewtolea@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mattyt03/peritus-ai.git"
+  },
+  "homepage": "https://github.com/mattyt03/peritus-ai/",
+  "icon": "media/logo.png",
   "categories": [
     "Other"
   ],

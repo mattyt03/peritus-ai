@@ -87,6 +87,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           vscode.commands.executeCommand("peritus.runCode");
           break;
         }
+        case "set-api-key": {
+          const config = vscode.workspace.getConfiguration("peritus");
+          await config.update("apiKey", data.value, vscode.ConfigurationTarget.Global);
+          break;
+        }
         case "open-settings": {
           vscode.commands.executeCommand("workbench.action.openSettings", "@ext:peritus.peritus");
         }

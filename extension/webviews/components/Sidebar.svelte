@@ -5,19 +5,21 @@
   import Response from "./Response.svelte";
   import { SSE } from "sse";
   import Examples from "./Examples.svelte";
+  import Welcome from "./Welcome.svelte";
+  import { fade } from 'svelte/transition';
   // import { glob } from 'glob';
-
   
   let API_KEY = "";
   let model = "gpt-3.5-turbo";
   let max_tokens_per_request = 1000;
-
+  
   const configuration = new Configuration({
     apiKey: API_KEY,
   });
   const openai = new OpenAIApi(configuration);
-
+  
   let selected_code = "";
+  let new_user = false;
   let prompt = tsvscode.getState()?.prompt || "";
   // let loading = false;
   let result = "";
@@ -80,6 +82,9 @@
     const setConfig = async () => {
       const peritusConfig = await getConfig();
       API_KEY = peritusConfig.apiKey;
+      if (API_KEY == "") {
+        new_user = true;
+      }
       model = peritusConfig.model;
       max_tokens_per_request = peritusConfig.maxTokensPerRequest;
     }
@@ -277,7 +282,7 @@
       } else if (error.error?.code === 429) {
         error_detail = "You have reached the API limit. Please try again later.";
       } else if (error.error?.type === 'invalid_request_error') {
-        error_detail = "You have not provided an API key. To add one, visit settings.";
+        error_detail = "Your API key is invalid. To update it, visit settings.";
       } else if (error.error?.code === 'invalid_api_key') {
         error_detail = "Your API key is invalid. To update it, visit settings.";
       } else {
@@ -343,6 +348,11 @@
     tsvscode.postMessage({ type: "replace-in-file", value: code });
   }
 
+  const setAPIKey = () => {
+    tsvscode.postMessage({ type: "set-api-key", value: API_KEY});
+    new_user = false;
+  }
+
   const copyCode = (code) => {
     navigator.clipboard.writeText(code);
   };
@@ -352,26 +362,37 @@
 
 <body>
   <!-- TODO: fix input and prompt overflow -->
-  <Input 
-    handleSubmit={streamResponse}
-    bind:prompt
-    bind:scope
-    bind:selected_code
-    streaming={streaming}
-  />
-  {#if responses.length === 0}
-    <Examples/>
-  {/if}
-  {#each responses as res (res.id)}
-    <Response id={res.id}
-      prompt={res.prompt} 
-      result={res.result}
-      error={res.error}
-      onRemove={handleRemove}
-      onCopy={copyCode}
-      onReplace={replaceInFile}
+  {#if new_user}
+    <Welcome
+      onSubmit={setAPIKey}
+      bind:API_KEY
     />
-  {/each} 
+  {:else}
+    <div class="container"
+      in:fade="{{duration: 600}}"
+    >
+      <Input 
+        handleSubmit={streamResponse}
+        bind:prompt
+        bind:scope
+        bind:selected_code
+        streaming={streaming}
+      />
+      {#if responses.length === 0}
+        <Examples/>
+      {/if}
+      {#each responses as res (res.id)}
+        <Response id={res.id}
+          prompt={res.prompt} 
+          result={res.result}
+          error={res.error}
+          onRemove={handleRemove}
+          onCopy={copyCode}
+          onReplace={replaceInFile}
+        />
+      {/each}
+    </div>
+  {/if} 
 </body>
 
 <style>
@@ -386,5 +407,11 @@
     flex-direction: column;
     padding: 0;
     height: 98vh;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    height: 100%;
   }
 </style>
