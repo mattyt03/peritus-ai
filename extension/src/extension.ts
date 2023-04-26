@@ -81,6 +81,12 @@ export function activate(context: vscode.ExtensionContext) {
 
       const activeFile = activeEditor.document.fileName;
 
+      // Check if the active file has a .py extension
+      const fileExtension = path.extname(activeFile);
+      if (fileExtension !== ".py") {
+        return;
+      }
+
       const task = new vscode.Task(
         { type: "peritus" },
         vscode.TaskScope.Workspace,

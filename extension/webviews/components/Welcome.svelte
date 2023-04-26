@@ -13,7 +13,7 @@
     <div class="popup">
         <div class="title-container">
             <div class="welcome-icon">
-                <Fa icon={faHandWave} size='2.25x'/>
+                <Fa icon={faHandWave} size='1.75x'/>
             </div>
             <h1 class="title">Welcome!</h1>
         </div>
@@ -21,12 +21,12 @@
             <a class="link" href="https://platform.openai.com/account/api-keys">OpenAI</a>.</p>
         <form class="form" on:submit|preventDefault={onSubmit}>
             <input type="text" class="input" name="api-key" bind:value={API_KEY} placeholder="Enter your key here"/>
-            <!-- <button type="submit" class="button">
+            <button type="submit" class="button">
                 <div class="button-text">Get Started</div>
                 <div class="arrow-icon">
                     <Fa icon={faArrowRight} size='1x'/>
                 </div>
-            </button> -->
+            </button>
         </form>
     </div>
 </div>
@@ -78,7 +78,7 @@
         align-items: center;
         border-radius: 1rem;
         background-color: #483D67;
-        margin-bottom: 1rem;
+        margin-bottom: 1.25rem;
         padding: 1.15rem;
         border: none;
         width: 100%;
@@ -90,7 +90,7 @@
         border-radius: 1rem;
         background-color: #483D67;
         overflow: hidden;
-        margin-bottom: 1rem;
+        /* margin-bottom: 1rem; */
         padding: 1.15rem;
         text-align: center;
         width: 100%;
@@ -117,18 +117,18 @@
         display: flex;
         /* justify-content: center; */
         align-items: center;
-        padding: 1rem;
+        /* padding: 1rem; */
     }
     .title {
         /* text-align: center; */
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: 500;
     }
     .text {
-        font-size: 1.2rem;
+        font-size: 1rem;
         line-height: 1.5;
         padding: 1rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.5rem;
         text-align: center;
     }
     .link {

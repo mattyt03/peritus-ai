@@ -55,7 +55,7 @@
     };
   }
 
-  let language = "javascript";
+  let language = "python";
   // TODO: c causes some problems
   // TODO: remove redundant languages
   const language_mappings = {
@@ -76,6 +76,7 @@
     "bash": "bash",
     "Bash": "bash",
     "jsx": "jsx",
+    "json": "javascript",
     "js": "javascript",
     "golang": "go",
     "Golang": "go",
