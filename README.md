@@ -8,7 +8,7 @@ To run the extension:
 4. Run "npm run package"
 5. Open the extension/src/extension.ts file
 6. Hit F5- this will open a new vscode window with the extension running. 
-Make sure you have the extension.ts file opened when you hit F5!
+Make sure you have the extension.ts file opened when you hit F5.
 7. In the test window, open the sidebar with the Peritus logo
 8. Enter an API key, and start using Peritus!
 
